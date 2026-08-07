@@ -1,163 +1,166 @@
 # Amazon Sales Data Analysis
 
-A modular Python project for analyzing Amazon sales data with exploratory data analysis (EDA), visualizations, and customer segmentation using machine learning.
+A modular Python project for exploratory data analysis (EDA), visualization, and automatic customer segmentation of Amazon sales data using a machine learning pipeline based on PCA and K-Means clustering.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
+[![Code Style](https://img.shields.io/badge/code%20style-pep8-000000.svg)](https://peps.python.org/pep-0008/)
 
-## 📊 Project Overview
+## Overview
 
-This project performs comprehensive analysis on Amazon sales data, including:
+The project turns a raw sales CSV into business insight through a layered, reusable architecture:
 
-- **Data Loading & Cleaning**: Handle CSV data, remove duplicates, process missing values
-- **Exploratory Data Analysis (EDA)**: Statistical summaries, distributions, correlations
-- **Visualizations**: Histograms, boxplots, time series, scatter plots, pie charts, radar charts
-- **Customer Segmentation**: K-Means clustering with PCA for customer profiling
+- **Data pipeline** - load, clean, and prepare the dataset
+- **Exploratory analysis** - descriptive statistics and top/bottom rankings
+- **Visualization** - distributions, time series, correlations, and segmentation plots
+- **Customer segmentation (ML)** - a reproducible machine learning workflow that groups customers into actionable segments using dimensionality reduction (PCA) and K-Means clustering
 
-## 🏗️ Architecture
+## Core Features
 
-The project follows a **Layered Architecture** pattern:
+- Duplicate removal, date parsing, and handling of irrelevant or missing columns
+- Numeric and categorical descriptive statistics
+- Top/bottom analysis by product, category, customer, state, and seller
+- Monthly revenue time series analysis
+- Correlation matrix and bivariate scatter plot matrix
+- Customer behavioral profiling (similar to RFM)
+- PCA for dimensionality reduction
+- K-Means clustering with the elbow method and inertia analysis
+- Automatic segment interpretation based on relative cluster profiles
+
+## The Machine Learning Pipeline
+
+The segmentation workflow in `src/clustering/` is fully reproducible and configuration-driven:
 
 ```
-analisis-de-datos/
-├── src/
-│   ├── config/          # Configuration and settings
-│   ├── core/           # Core utilities and formatters
-│   ├── data/           # Data loading and cleaning
-│   ├── analysis/       # EDA and statistics
-│   ├── visualization/  # Plots and charts
-│   ├── clustering/     # PCA, K-Means, segmentation
-│   └── reports/        # Report generation
-├── tests/              # Test files
-├── notebooks/          # Jupyter notebooks
-├── docs/               # Documentation
-├── data/               # Data files (amazon.csv)
-├── main.py             # Main entry point
-├── requirements.txt    # Dependencies
-├── LICENSE             # MIT License
-└── README.md           # This file
+Clean data
+    -> Agregate per customer (TotalAmount, Ticket, Frequency, Discount, Recency)
+    -> StandardScaler (center and scale)
+    -> PCA dimensionality reduction (default: 2 components)
+    -> K-Means clustering (configurable k, k-means++, multiple init)
+    -> Relative cluster profile (vs. global average)
+    -> Automatic segment labeling
 ```
 
-## 🚀 Quick Start
+### Segment Labels
+
+After clustering, each group is automatically labeled depending on its relative profile:
+
+| Segment | Profile |
+|---|---|
+| Premium (High Value) | High income, high frequency, recent purchase |
+| Frequent (Loyal) | Above-average purchase frequency |
+| Occasional (Price Sensitive) | High average discount ratio |
+| Inactive (At Risk) | Long time since last purchase |
+
+Cluster validation is supported through the elbow method, total inertia decomposition (intra/inter-class), and PCA loadings with a correlation circle.
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8 or later
+- `pip`
 
 ### Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd analisis-de-datos
-   ```
+```bash
+git clone <repository-url>
+cd analisis-de-datos
 
-2. **Create a virtual environment:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate      # Windows
-   ```
+python -m venv venv
+venv\Scripts\activate      # Windows
+source venv/bin/activate   # Linux / macOS
 
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+pip install -r requirements.txt
+```
 
 ### Usage
 
-#### Run Full Analysis
+Run the complete analysis pipeline (data loading, cleaning, EDA, visualizations, and segmentation):
+
 ```bash
 python main.py
 ```
 
-#### Run Tests
+`main.py` also exposes reusable entry points for testing and partial pipelines:
+
+- `run_full_analysis()` - the entire workflow
+- `run_data_loading_only()` - load and inspect the dataset
+- `run_visualization_only(df)` - distribution and time series plots
+- `run_segmentation_only(df, original_df)` - complete segmentation only
+
+### Running Tests
+
 ```bash
 pytest tests/
 ```
 
-#### Use Jupyter Notebooks
+### Jupyter Notebooks
+
+An interactive implementation of the pipeline is available:
+
 ```bash
 jupyter notebook notebooks/analisis_exploratorio.ipynb
 ```
 
-## 📦 Dependencies
+## Project Structure
 
-- `pandas` - Data manipulation
-- `matplotlib` - Plotting library
-- `seaborn` - Statistical graphics
-- `scikit-learn` - Machine learning
-- `numpy` - Numerical computing
+The repository follows a layered architecture, where each layer has the single responsibility:
 
-## 🎯 Features
+```
+analisis-de-datos/
+├── main.py                 # Entry point and pipeline orchestration
+├── amazon.csv              # Dataset used for the analysis
+├── requirements.txt        # Python dependencies
+├── LICENSE                 # MIT license
+├── README.md
+├── src/
+│   ├── config/             # Centralized configuration (columns, models, plot styling)
+│   ├── core/               # Formatters and display helpers
+│   ├── data/               # DataLoader and DataCleaner
+│   ├── analysis/           # EDA and statistical analyzer
+│   ├── visualization/      # Distribution and chart plotter
+│   ├── clustering/         # PCAModel, KMeansModel, CustomerSegmenter
+│   └── reports/            # Summary report generator
+├── tests/                  # pytest test suite
+├── notebooks/              # Jupyter notebooks
+└── docs/wiki/              # Project documentation
+```
 
-### Data Analysis
-- Basic statistics (numeric & categorical)
-- Correlation matrix
-- Top/Bottom analysis (products, customers, categories)
-- Time series analysis
+### Layer Reference
 
-### Visualizations
-- Distribution histograms and boxplots
-- Categorical distribution with income overlay
-- Monthly revenue time series
-- Scatter plot matrices
-- Correlation heatmaps
-- Pie charts (cluster distribution)
-- Radar charts (cluster profiles)
-- PCA scatter plots with correlation circles
+| Directory | Responsibility |
+|---|---|
+| `src/config/` | Centralized settings: columns, data types, clustering params, plot styling |
+| `src/core/` | Number/currency formatters and environment configuration |
+| `src/data/` | `DataLoader` (CSV ingestion with typed dtypes) and `DataCleaner` |
+| `src/analysis/` | `ExploratoryDataAnalysis` and `StatisticalAnalyzer` |
+| `src/visualization/` | `DistributionPlotter` and `ChartPlotter` |
+| `src/clustering/` | `PCAModel`, `KMeansModel`, and the `CustomerSegmenter` pipeline |
+| `src/reports/` | `ReportGenerator` for console-readable summaries |
 
-### Customer Segmentation
-- Customer aggregation (RFM-like features)
-- Standardization
-- PCA for dimensionality reduction
-- K-Means clustering
-- Automatic segment labeling:
-  - 🎯 PREMIUM (Alto Valor)
-  - 🔄 FRECUENTES (Leales)
-  - 💰 OCASIONALES (Sensibles Precio)
-  - ⏰ INACTIVOS (Riesgo Pérdida)
+## Configuration
 
-## 🔧 Configuration
+All knobs are centralized in `src/config/settings.py`:
 
-Edit `src/config/settings.py` to customize:
+| Setting | Purpose |
+|---|---|
+| `DATASET`, `DTYPES` | Source CSV path and column data types |
+| `COLS_TO_DROP` | Columns removed during cleaning |
+| `NUMERIC_VARS`, `CATEGORICAL_VARS` | Variables used in distribution analysis |
+| `ID_VARS` | Identity columns for top/bottom analysis |
+| `CLUSTERING_VARS` | Behavioral features feed into the clustering pipeline |
+| `KMEANS_CONFIG`, `PCA_CONFIG` | Model hyperparameters (k, initialization, random state) |
+| `PLOT_STYLE`, `FIGURE_SIZES` | Global plot styling |
 
-- Dataset path
-- Column names and data types
-- Variables for clustering
-- K-Means and PCA parameters
-- Plot styling
+## Documentation
 
-## 📁 Project Structure
+Extended guide and module reference are available in `docs/wiki/Home.md`.
 
-| Directory | Description |
-|-----------|-------------|
-| `src/config/` | Configuration constants |
-| `src/core/` | Utilities (formatters, display config) |
-| `src/data/` | DataLoader and DataCleaner classes |
-| `src/analysis/` | ExploratoryDataAnalysis and StatisticalAnalyzer |
-| `src/visualization/` | DistributionPlotter and ChartPlotter |
-| `src/clustering/` | PCAModel, KMeansModel, CustomerSegmenter |
-| `src/reports/` | ReportGenerator for summaries |
-| `tests/` | Unit tests |
-| `notebooks/` | Jupyter notebooks |
-| `docs/` | Project documentation |
+## License
 
-## 📖 Documentation
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-- [Wiki](docs/wiki/Home.md) - Detailed documentation
-- [Module Reference](docs/wiki/Home.md#modules-overview) - API documentation
+## Author
 
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-Mateo Cobo 
-
-## 🙏 Acknowledgments
-
-- Original data source: Amazon sales dataset
-- Built with: pandas, matplotlib, seaborn, scikit-learn
-
----
-
-⭐ If you find this project useful, please give it a star!
+Mateo Cobo
