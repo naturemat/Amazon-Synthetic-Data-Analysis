@@ -13,6 +13,7 @@ from typing import Optional, List, Tuple
 from matplotlib.ticker import FuncFormatter
 
 from ..core.formatters import get_formatter, human_format, human_format_detailed
+from ..config.settings import NUMERIC_VARS
 
 
 class ChartPlotter:
@@ -158,7 +159,7 @@ class ChartPlotter:
             Whether to save the figure
         """
         
-        columns = columns or ['Quantity', 'UnitPrice', 'Discount', 'Tax', 'ShippingCost', 'TotalAmount']
+        columns = columns or NUMERIC_VARS
         
         if not all(c in self._df.columns for c in columns):
             print('Faltan algunas de las columnas requeridas para el gráfico de pares.')
@@ -199,67 +200,63 @@ class ChartPlotter:
         
         plt.show()
     
-    def plot_id_distribution(self, id_vars: List[str]) -> None:
+    def plot_id_distribution(self, id_vars: List[str], top_n: int = 30) -> None:
         """
-        Plot distribution for ID variables.
-        
+        Plot distribution for ID variables, limited to the most frequent IDs.
+
         Parameters
         ----------
         id_vars : list
             ID columns to plot
+        top_n : int
+            Number of most frequent IDs to display
         """
-        
+
         for col in id_vars:
             if col not in self._df.columns:
                 continue
-            
+
             freq = self._df[col].value_counts()
-            order = freq.index
-            
+            top_ids = freq.head(top_n).index
+
+            df_subset = self._df[self._df[col].isin(top_ids)]
+
             income = (
-                self._df.groupby(col)['TotalAmount']
+                df_subset.groupby(col)['TotalAmount']
                 .sum()
-                .reindex(order)
+                .reindex(top_ids)
             )
-            
+
             fig, ax1 = plt.subplots(figsize=(10, 4))
-            
-            # Barras: distribución
+
+            # Bars: distribution of the top-N IDs
             sns.countplot(
-                data=self._df,
+                data=df_subset,
                 x=col,
-                order=order,
+                order=top_ids,
                 ax=ax1,
                 color='#9ecae1'
             )
             ax1.set_ylabel('Frecuencia')
             ax1.set_xlabel('')
-            ax1.set_xticks([])
-            ax1.set_title(f'Distribución e Ingresos por {col}')
+            ax1.tick_params(axis='x', rotation=45)
+            ax1.set_title(f'Distribución e Ingresos por {col} (Top {top_n})')
             ax1.grid(axis='y', linestyle='--', alpha=0.4)
-            
-            # Puntos rojos: ingresos - Top 20 y Bottom 20
-            income_sorted = income.sort_values(ascending=False)
-            top20 = income_sorted.head(20).index
-            bottom20 = income_sorted.tail(20).index
-            
-            selected_ids = [i for i in order if i in top20.union(bottom20)]
-            selected_pos = [order.get_loc(i) for i in selected_ids]
-            selected_income = income.loc[selected_ids]
-            
+
+            # Red dots: income per top-N ID
             ax2 = ax1.twinx()
             ax2.scatter(
-                selected_pos,
-                selected_income.values,
+                range(len(top_ids)),
+                income.values,
                 color='red',
                 alpha=0.6,
                 s=25,
                 zorder=5
             )
-            
+
             ax2.yaxis.set_major_formatter(get_formatter())
             ax2.set_ylabel('Ingresos')
-            
+
             plt.tight_layout()
             plt.show()
     

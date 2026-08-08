@@ -178,19 +178,19 @@ class StatisticalAnalyzer:
             if (row['Ingreso_Total'] > 1.2 and 
                 row['Frecuencia'] > 1.2 and 
                 row['Dias_Ultima_Compra'] < 0.8):
-                segmento_labels[seg] = '🎯 PREMIUM (Alto Valor)'
+                segmento_labels[seg] = 'PREMIUM (Alto Valor)'
             
             # 2. Frecuentes: alta frecuencia
             elif row['Frecuencia'] > 1.1:
-                segmento_labels[seg] = '🔄 FRECUENTES (Leales)'
+                segmento_labels[seg] = 'FRECUENTES (Leales)'
             
             # 3. Ocasionales / Sensibles al precio
             elif row['Descuento_Promedio'] > 1.05:
-                segmento_labels[seg] = '💰 OCASIONALES (Sensibles Precio)'
+                segmento_labels[seg] = 'OCASIONALES (Sensibles Precio)'
             
             # 4. Inactivos
             else:
-                segmento_labels[seg] = '⏰ INACTIVOS (Riesgo Pérdida)'
+                segmento_labels[seg] = 'INACTIVOS (Riesgo Pérdida)'
         
         return segmento_labels
     
@@ -214,8 +214,6 @@ class StatisticalAnalyzer:
         pd.DataFrame
             Cluster statistics
         """
-        import pandas as pd
-        
         cluster_stats = []
         
         for c in range(k_opt):

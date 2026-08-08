@@ -5,8 +5,8 @@ This is the main entry point for the modular Amazon Sales Data Analysis project.
 It orchestrates the entire analysis pipeline using the modular architecture.
 """
 
+import sys
 import pandas as pd
-import numpy as np
 
 # Core configuration
 from src.core.formatters import (
@@ -300,4 +300,6 @@ def run_segmentation_only(df: pd.DataFrame, original_df: pd.DataFrame):
 
 
 if __name__ == "__main__":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     run_full_analysis()

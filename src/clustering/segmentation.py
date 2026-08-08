@@ -6,12 +6,13 @@ Combines PCA, K-Means, and visualization for customer segmentation.
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from typing import Optional, List, Dict, Tuple
 
 from .pca import PCAModel
 from .kmeans import KMeansModel
 from ..config.settings import CLUSTERING_VARS
-from ..core.formatters import get_formatter
+from ..core.formatters import get_formatter, human_format_detailed
 
 
 class CustomerSegmenter:
@@ -155,19 +156,19 @@ class CustomerSegmenter:
             if (row['Ingreso_Total'] > 1.2 and 
                 row['Frecuencia'] > 1.2 and 
                 row['Dias_Ultima_Compra'] < 0.8):
-                self._segment_labels[seg] = '🎯 PREMIUM (Alto Valor)'
+                self._segment_labels[seg] = 'PREMIUM (Alto Valor)'
             
             # Frecuentes: alta frecuencia
             elif row['Frecuencia'] > 1.1:
-                self._segment_labels[seg] = '🔄 FRECUENTES (Leales)'
+                self._segment_labels[seg] = 'FRECUENTES (Leales)'
             
             # Ocasionales / Sensibles al precio
             elif row['Descuento_Promedio'] > 1.05:
-                self._segment_labels[seg] = '💰 OCASIONALES (Sensibles Precio)'
+                self._segment_labels[seg] = 'OCASIONALES (Sensibles Precio)'
             
             # Inactivos
             else:
-                self._segment_labels[seg] = '⏰ INACTIVOS (Riesgo Pérdida)'
+                self._segment_labels[seg] = 'INACTIVOS (Riesgo Pérdida)'
         
         print("\nEtiquetas asignadas automáticamente (flexible):")
         for k, v in self._segment_labels.items():
@@ -187,8 +188,6 @@ class CustomerSegmenter:
         print("PCA + CLUSTERS + CÍRCULO DE CORRELACIONES")
         
         loadings = self._pca_model.get_loadings(self._clustering_vars)
-        
-        plt.rcParams['font.family'] = 'Segoe UI Emoji'
         
         centroids = self._kmeans_model.centroids
         explained_var = self._pca_model.explained_variance_ratio
@@ -364,14 +363,7 @@ class CustomerSegmenter:
             on='ProductID',
             how='left'
         )
-        
-        def human_format(num, pos=None):
-            for unit in ['', 'K', 'M', 'B']:
-                if abs(num) < 1000:
-                    return f"{num:.0f}{unit}"
-                num /= 1000
-            return f"{num:.0f}B"
-        
+
         for c in range(self._kmeans_model.n_clusters):
             df_cluster = df_full[self._df['CustomerID'].isin(
                 self._clientes_agg[self._clientes_agg['Segmento'] == c].index
@@ -386,14 +378,13 @@ class CustomerSegmenter:
             
             plt.figure(figsize=(12, 5))
             ax = plt.gca()
-            import seaborn as sns
             sns.barplot(x=combined.index, y=combined.values, palette=['red']*3 + ['blue']*3, ax=ax)
             plt.title(f'Cluster {c} ({etiqueta}) - Top/Bottom 3 Productos por Ingreso')
             plt.ylabel('Total Amount')
             plt.xlabel('Producto')
             
             for p in ax.patches:
-                ax.annotate(human_format(p.get_height()),
+                ax.annotate(human_format_detailed(p.get_height()),
                            (p.get_x() + p.get_width()/2., p.get_height()),
                            ha='center', va='bottom', fontsize=9)
             
