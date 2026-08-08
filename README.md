@@ -33,7 +33,7 @@ The segmentation workflow in `src/clustering/` is fully reproducible and configu
 
 ```
 Clean data
-    -> Agregate per customer (TotalAmount, Ticket, Frequency, Discount, Recency)
+    -> Aggregate per customer (TotalAmount, Ticket, Frequency, Discount, Recency)
     -> StandardScaler (center and scale)
     -> PCA dimensionality reduction (default: 2 components)
     -> K-Means clustering (configurable k, k-means++, multiple init)
@@ -53,6 +53,60 @@ After clustering, each group is automatically labeled depending on its relative 
 | Inactive (At Risk) | Long time since last purchase |
 
 Cluster validation is supported through the elbow method, total inertia decomposition (intra/inter-class), and PCA loadings with a correlation circle.
+
+## Results & Conclusions
+
+The figures below are produced by a full run of `python main.py` over the included `amazon.csv`. A machine-readable copy of the same summary is available in `docs/conclusions_summary.json`.
+
+### Dataset snapshot
+
+| Metric | Value |
+|---|---|
+| Records | 100,000 |
+| Columns | 20 |
+| Unique customers | 30,243 |
+| Unique products | 175 |
+| Total revenue | USD 132,424,396.57 |
+| Average ticket | USD 1,324.24 |
+| Variance explained by PC1 + PC2 | 66.0% |
+
+### Ranking highlights
+
+| Metric | Top result |
+|---|---|
+| Best-selling product (units) | Outdoor Solar Lights - 18,713 units (USD 889,654.94) |
+| Highest-revenue product | Gaming Laptop RTX - USD 3,405,320.61 |
+| Highest-value customer | CUST034975 (James Hart) - USD 374,834.83 |
+| Peak monthly revenue | 2020-01 - USD 2,483,534.88 |
+
+### Customer segments (K-Means, k = 4)
+
+| Cluster | Label | Customers | Revenue share | Avg income | Avg ticket | Frequency | Discount |
+|---|---|---|---|---|---|---|---|
+| 0 | Occasional (Price Sensitive) | 9,375 (31.0%) | 9.7% | USD 1,375.50 | USD 731.53 | 1.78 | 15% |
+| 1 | Inactive (At Risk) | 14,987 (49.6%) | 15.3% | USD 1,355.48 | USD 717.02 | 1.80 | 3% |
+| 2 | Premium (High Value) | 322 (1.1%) | 31.9% | USD 131,117.38 | USD 1,836.12 | 71.62 | 7% |
+| 3 | Premium (High Value) | 5,559 (18.4%) | 43.0% | USD 10,252.70 | USD 1,712.97 | 5.99 | 7% |
+
+### Conclusions
+
+- Revenue is highly concentrated: the ~19.5% of customers in clusters 2 and 3 generate roughly 75% of total revenue.
+- The smallest cluster (1.1% of customers) is the highest-value group, with an average income about 95x higher and a purchase frequency about 40x higher than the mass market.
+- Approximately 80% of customers are low-frequency and low-spend (clusters 0 and 1); they represent the main retention and reactivation opportunity.
+- Two clusters received the same automatic label (Premium (High Value)); the labeling thresholds separate them only by income magnitude, which is a natural candidate for refinement.
+
+## Example Output
+
+The following figures are produced directly by the pipeline and stored under `docs/images/`:
+
+| | |
+|---|---|
+| ![Monthly revenue time series](docs/images/revenue_time_series.png) | ![Correlation matrix](docs/images/correlation_matrix.png) |
+| *Monthly revenue over time.* | *Correlation matrix of numeric variables.* |
+| ![Customer segments in PCA space](docs/images/segmentation_pca_clusters.png) | ![Segment radar profiles](docs/images/segmentation_radar.png) |
+| *Customer segments projected on PC1/PC2 with the loading circle.* | *Behavioral profile of each segment (radar).* |
+| ![Share of records and customers per segment](docs/images/segmentation_distribution.png) | |
+| *Share of records and customers per segment (pie charts).* | |
 
 ## Getting Started
 

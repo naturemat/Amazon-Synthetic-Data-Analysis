@@ -42,11 +42,13 @@ ENV/
 *.xlsx
 *.xls
 *.json
+!docs/conclusions_summary.json
 *.parquet
 
 # Output plots
 output/
 *.png
+!docs/images/*.png
 *.jpg
 *.jpeg
 *.pdf

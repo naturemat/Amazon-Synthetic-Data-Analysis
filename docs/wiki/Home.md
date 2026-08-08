@@ -127,6 +127,29 @@ Each segment is diagnosed through radar charts, cluster distribution pies, PCA s
 
 ---
 
+## Results & Conclusions
+
+The following figures are produced by a full run of `python main.py` over `amazon.csv`. The full numeric summary is available in `docs/conclusions_summary.json`, and the detailed analysis lives in the project [README](../../README.md#results--conclusions).
+
+| Metric | Value |
+|---|---|
+| Records | 100,000 |
+| Unique customers | 30,243 |
+| Total revenue | USD 132,424,396.57 |
+| Variance explained by PC1 + PC2 | 66.0% |
+
+![Customer segments in PCA space](../images/segmentation_pca_clusters.png)
+
+*Customer segments projected on PC1/PC2 with the loading circle.*
+
+Key findings:
+
+- The ~19.5% of customers in the two premium clusters generate about 75% of total revenue.
+- Around 80% of customers are low-frequency and low-spend (Occasional and Inactive), representing the main retention opportunity.
+- Two clusters currently receive the same automatic label (Premium), a candidate for refining the labeling thresholds.
+
+---
+
 ## Configuration
 
 `src/config/settings.py` centralizes all tunable parameters:
