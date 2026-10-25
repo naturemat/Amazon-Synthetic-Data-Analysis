@@ -46,6 +46,8 @@ htmlcov/
 
 # Documentos generados que no son evidencia
 *.pdf
+# Excepto la entrega académica final, si se genera en la raíz
+!propuesta_PDF.pdf
 
 # Sistema operativo
 .DS_Store
