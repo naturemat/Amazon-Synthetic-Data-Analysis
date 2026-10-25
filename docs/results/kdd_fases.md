@@ -1,6 +1,6 @@
 # Reporte de ejecución del proceso KDD
 
-Generado: 2026-10-25T09:05:13  
+Generado: 2026-10-25T09:13:43  
 Python: 3.13.0  
 Plataforma: Windows-10-10.0.19045-SP0
 
@@ -10,17 +10,17 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 | Fase | Nombre | Estado | Duración (s) | Métricas | Alertas |
 |---|---|---|---|---|---|
-| 1 | Comprensión del dominio y definición del objetivo | ok | 0.001 | 5 | 0 |
-| 2 | Selección de datos | ok | 2.625 | 11 | 1 |
-| 3 | Preprocesamiento y limpieza | ok | 0.89 | 14 | 1 |
-| 4 | Transformación y reducción | ok | 5.202 | 10 | 1 |
-| 5 | Minería de datos | ok | 74.007 | 7 | 1 |
-| 6 | Interpretación y evaluación | ok | 90.316 | 5 | 0 |
-| 7 | Presentación y uso del conocimiento | ok | 0.004 | 5 | 0 |
+| 1 | Comprensión del dominio y definición del objetivo | ok | 0.0 | 5 | 0 |
+| 2 | Selección de datos | ok | 4.38 | 11 | 1 |
+| 3 | Preprocesamiento y limpieza | ok | 2.259 | 14 | 1 |
+| 4 | Transformación y reducción | ok | 9.922 | 10 | 1 |
+| 5 | Minería de datos | ok | 101.239 | 7 | 1 |
+| 6 | Interpretación y evaluación | ok | 115.373 | 5 | 0 |
+| 7 | Presentación y uso del conocimiento | ok | 0.01 | 5 | 0 |
 
 ## Fase 1. Comprensión del dominio y definición del objetivo
 
-**Estado:** `ok` · **Duración:** 0.001 s
+**Estado:** `ok` · **Duración:** 0.0 s
 
 ### Métricas
 
@@ -48,7 +48,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 2. Selección de datos
 
-**Estado:** `ok` · **Duración:** 2.625 s
+**Estado:** `ok` · **Duración:** 4.38 s
 
 ### Métricas
 
@@ -86,7 +86,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 3. Preprocesamiento y limpieza
 
-**Estado:** `ok` · **Duración:** 0.89 s
+**Estado:** `ok` · **Duración:** 2.259 s
 
 ### Métricas
 
@@ -128,7 +128,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 4. Transformación y reducción
 
-**Estado:** `ok` · **Duración:** 5.202 s
+**Estado:** `ok` · **Duración:** 9.922 s
 
 ### Métricas
 
@@ -205,7 +205,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 5. Minería de datos
 
-**Estado:** `ok` · **Duración:** 74.007 s
+**Estado:** `ok` · **Duración:** 101.239 s
 
 ### Métricas
 
@@ -257,7 +257,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 6. Interpretación y evaluación
 
-**Estado:** `ok` · **Duración:** 90.316 s
+**Estado:** `ok` · **Duración:** 115.373 s
 
 ### Métricas
 
@@ -655,7 +655,10 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
       "clientes_evaluados": 28971,
       "fase_afectada": "Fase 5. Minería"
     }
-  ]
+  ],
+  "fecha_corte": "2024-12-29",
+  "fecha_sistema_usada": "2026-10-25",
+  "umbral_estabilidad": 0.7
 }
 ```
 
@@ -666,7 +669,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 7. Presentación y uso del conocimiento
 
-**Estado:** `ok` · **Duración:** 0.004 s
+**Estado:** `ok` · **Duración:** 0.01 s
 
 ### Métricas
 

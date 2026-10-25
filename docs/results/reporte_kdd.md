@@ -2,7 +2,7 @@
 
 **Proyecto:** Segmentación de clientes de una tienda en línea (Amazon Sales).  
 **Método:** Knowledge Discovery in Databases (Fayyad et al., 1996).  
-**Generado:** 2026-10-25T09:08:08
+**Generado:** 2026-10-25T09:17:39
 
 Este documento es evidencia automática del pipeline. El ensayo académico que interpreta los resultados está en `propuesta_PDF.md`.
 
@@ -105,6 +105,8 @@ ARI frente a la solución de referencia (1.0 = idénticos):
 
 > Un ARI alto indica que la partición se reproduce, no que los totales sean correctos: duplicados o ruido pueden preservar los segmentos y, a la vez, inflar pedidos e ingreso. El ARI debe acompañarse de auditoría de ingresos y conteos.
 
+> La fecha del sistema se fijó en 2026-10-25 para que el escenario sea reproducible; en producción sería la fecha real de consulta.
+
 ## 8. Uso del conocimiento (fase 7)
 
 - Ingreso en riesgo: **USD 10,567,705.40**.
@@ -119,12 +121,12 @@ ARI frente a la solución de referencia (1.0 = idénticos):
 | Fase | Nombre | Estado | Duración (s) | Alertas |
 |---|---|---|---:|---:|
 | 1 | Comprensión del dominio y definición del objetivo | ok | 0.00 | 0 |
-| 2 | Selección de datos | ok | 2.62 | 1 |
-| 3 | Preprocesamiento y limpieza | ok | 0.89 | 1 |
-| 4 | Transformación y reducción | ok | 5.20 | 1 |
-| 5 | Minería de datos | ok | 74.01 | 1 |
-| 6 | Interpretación y evaluación | ok | 90.32 | 0 |
-| 7 | Presentación y uso del conocimiento | ok | 0.00 | 0 |
+| 2 | Selección de datos | ok | 4.38 | 1 |
+| 3 | Preprocesamiento y limpieza | ok | 2.26 | 1 |
+| 4 | Transformación y reducción | ok | 9.92 | 1 |
+| 5 | Minería de datos | ok | 101.24 | 1 |
+| 6 | Interpretación y evaluación | ok | 115.37 | 0 |
+| 7 | Presentación y uso del conocimiento | ok | 0.01 | 0 |
 
 ## 10. Limitaciones declaradas
 
