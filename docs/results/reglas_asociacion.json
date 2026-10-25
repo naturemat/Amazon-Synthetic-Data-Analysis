@@ -1,0 +1,12 @@
+{
+  "diagnostico_canastas": {
+    "pedidos": 89820,
+    "items_por_pedido_media": 1.0,
+    "items_por_pedido_max": 1,
+    "pedidos_con_mas_de_un_producto": 0,
+    "apriori_aplicable": false,
+    "explicacion": "Cada pedido contiene un único producto; no hay canastas que permitan reglas de asociación intra-pedido. Se justifica usar clustering de clientes y se complementa con co-compra histórica."
+  },
+  "reglas": [],
+  "advertencia": "Las reglas se calculan sobre el historial del cliente, no sobre pedidos individuales, porque no existen canastas multi-producto."
+}

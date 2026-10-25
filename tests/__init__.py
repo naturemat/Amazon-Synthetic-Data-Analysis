@@ -1,1 +1,1 @@
-"""Tests package for Amazon Sales Data Analysis."""
+"""Paquete de pruebas del proyecto KDD."""

@@ -10,6 +10,7 @@ import seaborn as sns
 from typing import Optional, List
 
 from ..core.formatters import get_formatter, human_format
+from ..core.plotting import save_figure
 from ..config.settings import NUMERIC_VARS, CATEGORICAL_VARS
 
 
@@ -71,7 +72,7 @@ class DistributionPlotter:
             axes[1].set_title(f'Boxplot de {col}')
             
             plt.tight_layout()
-            plt.show()
+            save_figure(fig, f"kdd_distribucion_num_{col}")
     
     def plot_categorical_distributions(self, columns: Optional[List[str]] = None) -> None:
         """
@@ -148,7 +149,7 @@ class DistributionPlotter:
             )
             
             plt.tight_layout()
-            plt.show()
+            save_figure(fig, f"kdd_distribucion_cat_{col}")
 
 
 def plot_numeric_distributions(df: pd.DataFrame, columns: Optional[List[str]] = None) -> None:

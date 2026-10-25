@@ -1,0 +1,366 @@
+{
+  "seleccion_k": {
+    "k_seleccionado": 5,
+    "criterio": "Mayor silhouette entre k=3..6. Ningún k alcanzó el 5% mínimo por cluster; la restricción se relajó al 1% técnico y se documenta. Desempate por menor Davies-Bouldin.",
+    "silhouette": 0.318437,
+    "davies_bouldin": 0.88439,
+    "calinski_harabasz": 18789.4135,
+    "cluster_min_pct": 1.294,
+    "restriccion_relajada": true,
+    "umbral_minimo_aplicado_pct": 1.0,
+    "umbral_preferido_pct": 5.0,
+    "runner_up": {
+      "k": 4,
+      "silhouette": 0.291011,
+      "davies_bouldin": 1.001153
+    },
+    "k_evaluados": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "tabla": [
+      {
+        "k": 2,
+        "inercia": 97458.8314,
+        "silhouette": 0.788018,
+        "davies_bouldin": 0.240721,
+        "calinski_harabasz": 14088.201,
+        "cluster_min_pct": 1.305,
+        "cluster_max_pct": 98.695,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          28593,
+          378
+        ],
+        "delta_inercia": NaN,
+        "delta_inercia_pct": NaN
+      },
+      {
+        "k": 3,
+        "inercia": 71714.0204,
+        "silhouette": 0.281644,
+        "davies_bouldin": 0.990371,
+        "calinski_harabasz": 14772.3477,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 71.347,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          20670,
+          375,
+          7926
+        ],
+        "delta_inercia": -25744.811,
+        "delta_inercia_pct": -26.416
+      },
+      {
+        "k": 4,
+        "inercia": 53637.2256,
+        "silhouette": 0.291011,
+        "davies_bouldin": 1.001153,
+        "calinski_harabasz": 16420.9627,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 46.291,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          8670,
+          6515,
+          13411,
+          375
+        ],
+        "delta_inercia": -18076.7948,
+        "delta_inercia_pct": -25.207
+      },
+      {
+        "k": 5,
+        "inercia": 40297.1208,
+        "silhouette": 0.318437,
+        "davies_bouldin": 0.88439,
+        "calinski_harabasz": 18789.4135,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 38.901,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          5099,
+          11270,
+          375,
+          7408,
+          4819
+        ],
+        "delta_inercia": -13340.1048,
+        "delta_inercia_pct": -24.871
+      },
+      {
+        "k": 6,
+        "inercia": 35445.7554,
+        "silhouette": 0.289428,
+        "davies_bouldin": 0.973919,
+        "calinski_harabasz": 17881.1439,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 26.489,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          6413,
+          4517,
+          375,
+          3128,
+          6864,
+          7674
+        ],
+        "delta_inercia": -4851.3654,
+        "delta_inercia_pct": -12.039
+      },
+      {
+        "k": 7,
+        "inercia": 31834.1493,
+        "silhouette": 0.295234,
+        "davies_bouldin": 1.02344,
+        "calinski_harabasz": 17138.5638,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 26.371,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          5610,
+          375,
+          3156,
+          7640,
+          6420,
+          2920,
+          2850
+        ],
+        "delta_inercia": -3611.6061,
+        "delta_inercia_pct": -10.189
+      },
+      {
+        "k": 8,
+        "inercia": 29042.6086,
+        "silhouette": 0.281601,
+        "davies_bouldin": 1.014794,
+        "calinski_harabasz": 16499.4204,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 23.216,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          4170,
+          5700,
+          375,
+          2225,
+          5030,
+          2538,
+          6726,
+          2207
+        ],
+        "delta_inercia": -2791.5407,
+        "delta_inercia_pct": -8.769
+      },
+      {
+        "k": 9,
+        "inercia": 26624.1743,
+        "silhouette": 0.276863,
+        "davies_bouldin": 1.015176,
+        "calinski_harabasz": 16076.641,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 21.09,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          3909,
+          6110,
+          375,
+          4838,
+          1953,
+          2093,
+          1825,
+          2842,
+          5026
+        ],
+        "delta_inercia": -2418.4343,
+        "delta_inercia_pct": -8.327
+      },
+      {
+        "k": 10,
+        "inercia": 24885.5693,
+        "silhouette": 0.256697,
+        "davies_bouldin": 1.061064,
+        "calinski_harabasz": 15513.0634,
+        "cluster_min_pct": 1.294,
+        "cluster_max_pct": 16.793,
+        "clusters_menores_5pct": 1,
+        "tamanos": [
+          4163,
+          4865,
+          375,
+          1970,
+          2870,
+          1758,
+          4488,
+          3080,
+          3812,
+          1590
+        ],
+        "delta_inercia": -1738.605,
+        "delta_inercia_pct": -6.53
+      }
+    ],
+    "codo": {
+      "k_codo": 5,
+      "distancia_maxima": 0.412641,
+      "metodo": "máxima distancia a la cuerda (curva de inercia normalizada)"
+    }
+  },
+  "metricas_finales": {
+    "n_clusters": 5,
+    "silhouette": 0.318437,
+    "davies_bouldin": 0.88439,
+    "calinski_harabasz": 18789.4135,
+    "tamanos": [
+      5099,
+      11270,
+      375,
+      7408,
+      4819
+    ],
+    "participacion": [
+      17.6,
+      38.901,
+      1.294,
+      25.57,
+      16.634
+    ]
+  },
+  "estabilidad": {
+    "n_iteraciones": 10,
+    "fraccion_entrenamiento": 0.8,
+    "ari_media": 0.9809,
+    "ari_desv": 0.0087,
+    "ari_min": 0.9693,
+    "ari_max": 0.9937,
+    "valores": [
+      0.9904,
+      0.9839,
+      0.9732,
+      0.9937,
+      0.9693,
+      0.9899,
+      0.9765,
+      0.9845,
+      0.9742,
+      0.9731
+    ],
+    "interpretacion": "Estable"
+  },
+  "etiquetas": {
+    "0": "Cazadores de Ofertas",
+    "3": "Ocasionales Inactivos",
+    "1": "Potenciales de Crecimiento",
+    "2": "VIP Elite",
+    "4": "VIP Leales"
+  },
+  "perfil": [
+    {
+      "Cluster": 4,
+      "Etiqueta": "VIP Leales",
+      "Clientes": 4819,
+      "Pct_Clientes": 16.63,
+      "Ingreso_Neto": 40210679.25,
+      "Participacion_Ingresos": 38.72,
+      "Ticket_Promedio": 1714.39,
+      "Frecuencia": 5.03,
+      "Descuento_Promedio": 0.0688,
+      "Dias_Ultima_Compra": 347.2,
+      "Ingreso_Anualizado": 2485.36,
+      "R_Score": 3.88,
+      "F_Score": 4.35,
+      "M_Score": 4.84,
+      "Categoria_Favorita": "Electronics",
+      "Marca_Favorita": "BrightLux",
+      "Ciudad_Principal": "Austin",
+      "Metodo_Pago_Principal": "Credit Card"
+    },
+    {
+      "Cluster": 2,
+      "Etiqueta": "VIP Elite",
+      "Clientes": 375,
+      "Pct_Clientes": 1.29,
+      "Ingreso_Neto": 36120356.0,
+      "Participacion_Ingresos": 34.78,
+      "Ticket_Promedio": 1621.41,
+      "Frecuencia": 59.46,
+      "Descuento_Promedio": 0.0745,
+      "Dias_Ultima_Compra": 36.2,
+      "Ingreso_Anualizado": 19547.01,
+      "R_Score": 4.97,
+      "F_Score": 5.0,
+      "M_Score": 5.0,
+      "Categoria_Favorita": "Electronics",
+      "Marca_Favorita": "BrightLux",
+      "Ciudad_Principal": "Charlotte",
+      "Metodo_Pago_Principal": "Credit Card"
+    },
+    {
+      "Cluster": 1,
+      "Etiqueta": "Potenciales de Crecimiento",
+      "Clientes": 11270,
+      "Pct_Clientes": 38.9,
+      "Ingreso_Neto": 16953138.7,
+      "Participacion_Ingresos": 16.32,
+      "Ticket_Promedio": 622.44,
+      "Frecuencia": 2.26,
+      "Descuento_Promedio": 0.0517,
+      "Dias_Ultima_Compra": 349.0,
+      "Ingreso_Anualizado": 1008.34,
+      "R_Score": 3.8,
+      "F_Score": 3.16,
+      "M_Score": 2.99,
+      "Categoria_Favorita": "Electronics",
+      "Marca_Favorita": "BrightLux",
+      "Ciudad_Principal": "Austin",
+      "Metodo_Pago_Principal": "Credit Card"
+    },
+    {
+      "Cluster": 3,
+      "Etiqueta": "Ocasionales Inactivos",
+      "Clientes": 7408,
+      "Pct_Clientes": 25.57,
+      "Ingreso_Neto": 6145259.1,
+      "Participacion_Ingresos": 5.92,
+      "Ticket_Promedio": 581.74,
+      "Frecuencia": 1.35,
+      "Descuento_Promedio": 0.0355,
+      "Dias_Ultima_Compra": 1266.5,
+      "Ingreso_Anualizado": 220.72,
+      "R_Score": 1.42,
+      "F_Score": 2.19,
+      "M_Score": 2.23,
+      "Categoria_Favorita": "Electronics",
+      "Marca_Favorita": "BrightLux",
+      "Ciudad_Principal": "Charlotte",
+      "Metodo_Pago_Principal": "Credit Card"
+    },
+    {
+      "Cluster": 0,
+      "Etiqueta": "Cazadores de Ofertas",
+      "Clientes": 5099,
+      "Pct_Clientes": 17.6,
+      "Ingreso_Neto": 4422446.3,
+      "Participacion_Ingresos": 4.26,
+      "Ticket_Promedio": 525.88,
+      "Frecuencia": 1.53,
+      "Descuento_Promedio": 0.183,
+      "Dias_Ultima_Compra": 815.0,
+      "Ingreso_Anualizado": 674.23,
+      "R_Score": 2.54,
+      "F_Score": 2.4,
+      "M_Score": 2.25,
+      "Categoria_Favorita": "Electronics",
+      "Marca_Favorita": "BrightLux",
+      "Ciudad_Principal": "Austin",
+      "Metodo_Pago_Principal": "Credit Card"
+    }
+  ]
+}

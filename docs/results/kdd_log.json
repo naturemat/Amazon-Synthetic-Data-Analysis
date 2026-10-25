@@ -1,0 +1,624 @@
+{
+  "generated_at": "2026-10-25T08:41:03",
+  "finished_at": "2026-10-25T08:45:20",
+  "environment": {
+    "python": "3.13.0",
+    "platform": "Windows-10-10.0.19045-SP0"
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Comprensión del dominio y definición del objetivo",
+      "status": "ok",
+      "duration_s": 0.0,
+      "metrics": {
+        "pregunta_investigacion": "¿Qué segmentos de clientes existen según su valor, frecuencia, sensibilidad al descuento y recencia, y cómo debe priorizar la organización sus acciones de retención y crecimiento?",
+        "objetivo_general": "Segmentar la base de clientes de una tienda en línea y traducir los segmentos en acciones comerciales priorizadas, cuantificando el ingreso en riesgo y el potencial de crecimiento.",
+        "criterios_exito": [
+          "Segmentos con tamaño mínimo preferido del 5 % de la base para que sean accionables; si la estructura natural produce un segmento élite menor, se admite un mínimo técnico del 1 % y se documenta la relajación.",
+          "Coeficiente de silueta (silhouette) positivo y estable; se reporta junto a Davies-Bouldin y Calinski-Harabasz, no de forma aislada.",
+          "Etiquetas de segmento únicas y trazables a un perfil de negocio.",
+          "Estabilidad del agrupamiento ≥ 0,70 de ARI promedio en remuestreo bootstrap.",
+          "Cada segmento debe tener al menos una acción, un KPI y un riesgo asociado."
+        ],
+        "unidad_de_analisis": "cliente (agregación de pedidos)",
+        "tarea_de_mineria": "clustering no supervisado (K-Means)"
+      },
+      "decisions": [
+        "Se elige clustering y no reglas de asociación porque el objetivo es segmentar clientes para retención, no descubrir canastas. Además, cada pedido contiene un solo producto, por lo que Apriori intra-pedido no aplica.",
+        "Se declara que el dataset es simulado; la actividad permite datos reales o simulados y ocultarlo invalidaría la interpretación.",
+        "La métrica de éxito no es solo estadística: los segmentos deben ser accionables, estables y traducibles a KPI de negocio."
+      ],
+      "warnings": [],
+      "error": null
+    },
+    {
+      "phase": 2,
+      "title": "Selección de datos",
+      "status": "ok",
+      "duration_s": 3.995,
+      "metrics": {
+        "filas": 100000,
+        "columnas": 20,
+        "periodo": "2020-01-01 a 2024-12-29",
+        "clientes": 30243,
+        "productos": 175,
+        "nulos": 0,
+        "duplicados": 0,
+        "max_items_por_pedido": 1,
+        "es_probablemente_simulado": true,
+        "evidencia_simulacion": [
+          "El número de filas es exactamente 100 000.",
+          "No hay valores nulos en ninguna columna.",
+          "No hay filas duplicadas exactas.",
+          "Las filas por año son casi uniformes (CV = 0.0049).",
+          "Cada pedido contiene exactamente un producto (no hay canastas).",
+          "El periodo inicia exactamente el 2020-01-01."
+        ],
+        "diccionario_datos": "docs/results/diccionario_datos.md"
+      },
+      "decisions": [
+        "Se conserva el periodo completo 2020-2024: permite analizar recencia y estacionalidad sin un sesgo de ventana arbitrario.",
+        "Se descarta el análisis de canasta porque el 100 % de los pedidos tiene un solo producto; se documenta como limitación del dataset."
+      ],
+      "warnings": [
+        "El dataset presenta evidencia fuerte de simulación; los hallazgos son ilustrativos y no deben presentarse como resultados de Amazon."
+      ],
+      "error": null
+    },
+    {
+      "phase": 3,
+      "title": "Preprocesamiento y limpieza",
+      "status": "ok",
+      "duration_s": 1.869,
+      "metrics": {
+        "filas_entrada": 100000,
+        "filas_limpias": 100000,
+        "filas_ventas_realizadas": 89820,
+        "duplicados_eliminados": 0,
+        "nulos_antes": 0,
+        "nulos_despues": 0,
+        "estados_incluidos": [
+          "Delivered",
+          "Shipped"
+        ],
+        "estados_excluidos": 10180,
+        "ingreso_reportado_total_amount": 132424396.57,
+        "ingreso_neto_con_descuento": 123182963.52,
+        "sobreestimacion_por_descuento": 9241433.05,
+        "filas_inconsistentes_total_amount": 59754,
+        "fecha_corte": "2024-12-29",
+        "reporte_limpieza": "D:\\Personal_projects\\Analisis de Datos\\docs\\results\\reporte_limpieza.json"
+      },
+      "decisions": [
+        "Todas las fechas se interpretaron correctamente.",
+        "Duplicados exactos eliminados: 0. Quedan 100,000 filas.",
+        "No se encontraron valores faltantes; no fue necesario imputar. La fase de limpieza se documenta igualmente porque el resultado es una condición del dataset, no una omisión del proceso.",
+        "Reglas de consistencia: se eliminaron 0 filas con cantidad/precio inválido; se recortaron 0 descuentos al rango [0, 1] y se llevaron a cero los impuestos/envíos negativos.",
+        "TotalAmount del dataset no descuenta la promoción (diferencia máxima de 0.30 por redondeo). Se adopta Ingreso_Neto para el análisis y se cuantifica una sobreestimación de 9,241,433.05 USD.",
+        "Los valores atípicos se reportan con IQR (factor 3) y se conservan; en la fase 4 se recortan solo las variables de modelado al percentil 1-99.",
+        "Conjunto analítico: 89,820 ventas realizadas (Delivered, Shipped). Se excluyen 10,180 pedidos cancelados, devueltos o pendientes para no inflar ingreso ni recencia."
+      ],
+      "warnings": [
+        "No había nulos ni duplicados: la limpieza no cambia el resultado en este dataset. Su impacto se demuestra en el experimento de degradación."
+      ],
+      "error": null
+    },
+    {
+      "phase": 4,
+      "title": "Transformación y reducción",
+      "status": "ok",
+      "duration_s": 9.02,
+      "metrics": {
+        "clientes_agregados": 28971,
+        "fecha_corte_recencia": "2024-12-29",
+        "recencia_min_dias": 0,
+        "recencia_mediana_dias": 545.0,
+        "recencia_max_dias": 1824,
+        "variables_modelo": [
+          "Ingreso_Neto",
+          "Ticket_Promedio",
+          "Frecuencia",
+          "Descuento_Promedio",
+          "Dias_Ultima_Compra"
+        ],
+        "winsorizacion": {
+          "Ingreso_Neto": {
+            "percentil_inferior": 0.01,
+            "percentil_superior": 0.99,
+            "limite_inferior": 79.0,
+            "limite_superior": 62784.97,
+            "valores_recortados": 567,
+            "porcentaje_recortado": 1.9571
+          },
+          "Ticket_Promedio": {
+            "percentil_inferior": 0.01,
+            "percentil_superior": 0.99,
+            "limite_inferior": 79.0,
+            "limite_superior": 2640.7149,
+            "valores_recortados": 569,
+            "porcentaje_recortado": 1.964
+          },
+          "Frecuencia": {
+            "percentil_inferior": 0.01,
+            "percentil_superior": 0.99,
+            "limite_inferior": 1.0,
+            "limite_superior": 40.0,
+            "valores_recortados": 284,
+            "porcentaje_recortado": 0.9803
+          }
+        },
+        "acp_varianza_2_componentes": 0.691,
+        "acp_componentes_para_85pct": 3,
+        "acp_varianza_acumulada": [
+          0.4879,
+          0.691,
+          0.8598,
+          0.9969,
+          1.0
+        ]
+      },
+      "decisions": [
+        "La recencia se calcula contra la fecha máxima del dataset (2024-12-29), no contra la fecha del sistema; así el resultado es reproducible en cualquier día de ejecución.",
+        "Se recortan Ingreso_Neto, Ticket_Promedio y Frecuencia al percentil 1-99 para evitar que valores extremos dominen la distancia euclidiana.",
+        "Se estandariza antes de K-Means porque las variables tienen escalas incompatibles (USD vs días vs número de pedidos).",
+        "El ACP con 2 componentes retiene 69.1%. Por eso se usa para visualización y diagnóstico, no como entrada única del agrupamiento; K-Means trabaja sobre las cinco variables estandarizadas."
+      ],
+      "warnings": [
+        "PC1+PC2 retienen menos del 75 % de la varianza; reducir a 2 componentes antes de agrupar habría descartado información relevante."
+      ],
+      "error": null
+    },
+    {
+      "phase": 5,
+      "title": "Minería de datos",
+      "status": "ok",
+      "duration_s": 123.142,
+      "metrics": {
+        "k_seleccionado": 5,
+        "criterio_k": "Mayor silhouette entre k=3..6. Ningún k alcanzó el 5% mínimo por cluster; la restricción se relajó al 1% técnico y se documenta. Desempate por menor Davies-Bouldin.",
+        "metricas_k": {
+          "silhouette": 0.318437,
+          "davies_bouldin": 0.88439,
+          "calinski_harabasz": 18789.4135,
+          "cluster_min_pct": 1.294,
+          "runner_up": {
+            "k": 4,
+            "silhouette": 0.291011,
+            "davies_bouldin": 1.001153
+          },
+          "codo": {
+            "k_codo": 5,
+            "distancia_maxima": 0.412641,
+            "metodo": "máxima distancia a la cuerda (curva de inercia normalizada)"
+          }
+        },
+        "etiquetas": {
+          "0": "Cazadores de Ofertas",
+          "3": "Ocasionales Inactivos",
+          "1": "Potenciales de Crecimiento",
+          "2": "VIP Elite",
+          "4": "VIP Leales"
+        },
+        "apriori_aplicable": false,
+        "max_items_por_pedido": 1,
+        "reglas_co_compra_encontradas": 0
+      },
+      "decisions": [
+        "k = 5 se elige con evidencia: mayor silhouette entre k=3..6 (0.318), desempate por Davies-Bouldin y umbral mínimo de tamaño documentado. El codo se reporta como diagnóstico complementario.",
+        "No se usa Apriori clásico: no hay canastas multi-producto. Se calculan reglas de co-compra a nivel de cliente como complemento exploratorio."
+      ],
+      "warnings": [
+        "Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster: la estructura natural contiene un segmento élite de 1,29 % (375 clientes) que concentra 34,78 % del ingreso. Se relajó el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la relajación queda registrada en la evaluación."
+      ],
+      "error": null
+    },
+    {
+      "phase": 6,
+      "title": "Interpretación y evaluación",
+      "status": "ok",
+      "duration_s": 116.42,
+      "metrics": {
+        "metricas_finales": {
+          "n_clusters": 5,
+          "silhouette": 0.318437,
+          "davies_bouldin": 0.88439,
+          "calinski_harabasz": 18789.4135,
+          "tamanos": [
+            5099,
+            11270,
+            375,
+            7408,
+            4819
+          ],
+          "participacion": [
+            17.6,
+            38.901,
+            1.294,
+            25.57,
+            16.634
+          ]
+        },
+        "estabilidad_bootstrap": {
+          "n_iteraciones": 10,
+          "fraccion_entrenamiento": 0.8,
+          "ari_media": 0.9809,
+          "ari_desv": 0.0087,
+          "ari_min": 0.9693,
+          "ari_max": 0.9937,
+          "valores": [
+            0.9904,
+            0.9839,
+            0.9732,
+            0.9937,
+            0.9693,
+            0.9899,
+            0.9765,
+            0.9845,
+            0.9742,
+            0.9731
+          ],
+          "interpretacion": "Estable"
+        },
+        "etiquetas_unicas": true,
+        "segmentos": [
+          {
+            "Cluster": 4,
+            "Etiqueta": "VIP Leales",
+            "Clientes": 4819,
+            "Pct_Clientes": 16.63,
+            "Ingreso_Neto": 40210679.25,
+            "Participacion_Ingresos": 38.72,
+            "Ticket_Promedio": 1714.39,
+            "Frecuencia": 5.03,
+            "Descuento_Promedio": 0.0688,
+            "Dias_Ultima_Compra": 347.2,
+            "Ingreso_Anualizado": 2485.36,
+            "R_Score": 3.88,
+            "F_Score": 4.35,
+            "M_Score": 4.84,
+            "Categoria_Favorita": "Electronics",
+            "Marca_Favorita": "BrightLux",
+            "Ciudad_Principal": "Austin",
+            "Metodo_Pago_Principal": "Credit Card"
+          },
+          {
+            "Cluster": 2,
+            "Etiqueta": "VIP Elite",
+            "Clientes": 375,
+            "Pct_Clientes": 1.29,
+            "Ingreso_Neto": 36120356.0,
+            "Participacion_Ingresos": 34.78,
+            "Ticket_Promedio": 1621.41,
+            "Frecuencia": 59.46,
+            "Descuento_Promedio": 0.0745,
+            "Dias_Ultima_Compra": 36.2,
+            "Ingreso_Anualizado": 19547.01,
+            "R_Score": 4.97,
+            "F_Score": 5.0,
+            "M_Score": 5.0,
+            "Categoria_Favorita": "Electronics",
+            "Marca_Favorita": "BrightLux",
+            "Ciudad_Principal": "Charlotte",
+            "Metodo_Pago_Principal": "Credit Card"
+          },
+          {
+            "Cluster": 1,
+            "Etiqueta": "Potenciales de Crecimiento",
+            "Clientes": 11270,
+            "Pct_Clientes": 38.9,
+            "Ingreso_Neto": 16953138.7,
+            "Participacion_Ingresos": 16.32,
+            "Ticket_Promedio": 622.44,
+            "Frecuencia": 2.26,
+            "Descuento_Promedio": 0.0517,
+            "Dias_Ultima_Compra": 349.0,
+            "Ingreso_Anualizado": 1008.34,
+            "R_Score": 3.8,
+            "F_Score": 3.16,
+            "M_Score": 2.99,
+            "Categoria_Favorita": "Electronics",
+            "Marca_Favorita": "BrightLux",
+            "Ciudad_Principal": "Austin",
+            "Metodo_Pago_Principal": "Credit Card"
+          },
+          {
+            "Cluster": 3,
+            "Etiqueta": "Ocasionales Inactivos",
+            "Clientes": 7408,
+            "Pct_Clientes": 25.57,
+            "Ingreso_Neto": 6145259.1,
+            "Participacion_Ingresos": 5.92,
+            "Ticket_Promedio": 581.74,
+            "Frecuencia": 1.35,
+            "Descuento_Promedio": 0.0355,
+            "Dias_Ultima_Compra": 1266.5,
+            "Ingreso_Anualizado": 220.72,
+            "R_Score": 1.42,
+            "F_Score": 2.19,
+            "M_Score": 2.23,
+            "Categoria_Favorita": "Electronics",
+            "Marca_Favorita": "BrightLux",
+            "Ciudad_Principal": "Charlotte",
+            "Metodo_Pago_Principal": "Credit Card"
+          },
+          {
+            "Cluster": 0,
+            "Etiqueta": "Cazadores de Ofertas",
+            "Clientes": 5099,
+            "Pct_Clientes": 17.6,
+            "Ingreso_Neto": 4422446.3,
+            "Participacion_Ingresos": 4.26,
+            "Ticket_Promedio": 525.88,
+            "Frecuencia": 1.53,
+            "Descuento_Promedio": 0.183,
+            "Dias_Ultima_Compra": 815.0,
+            "Ingreso_Anualizado": 674.23,
+            "R_Score": 2.54,
+            "F_Score": 2.4,
+            "M_Score": 2.25,
+            "Categoria_Favorita": "Electronics",
+            "Marca_Favorita": "BrightLux",
+            "Ciudad_Principal": "Austin",
+            "Metodo_Pago_Principal": "Credit Card"
+          }
+        ],
+        "experimento_degradacion": {
+          "resumen": [
+            {
+              "escenario": "Ruido ±20% en precio (20% filas)",
+              "fase_afectada": "Fase 3-4. Calidad y transformación",
+              "ari_media": 0.9817,
+              "ari_desv": 0.0023,
+              "ari_min": 0.9792,
+              "ari_max": 0.9836,
+              "repeticiones": 3
+            },
+            {
+              "escenario": "Duplicados 5% (limpieza omitida)",
+              "fase_afectada": "Fase 3. Preprocesamiento",
+              "ari_media": 0.9666,
+              "ari_desv": 0.0017,
+              "ari_min": 0.9655,
+              "ari_max": 0.9686,
+              "repeticiones": 3
+            },
+            {
+              "escenario": "Sin filtrar estados no realizados",
+              "fase_afectada": "Fase 3. Preprocesamiento",
+              "ari_media": 0.8615,
+              "ari_desv": 0.0016,
+              "ari_min": 0.86,
+              "ari_max": 0.8631,
+              "repeticiones": 3
+            },
+            {
+              "escenario": "Nulos 10% imputados con 0",
+              "fase_afectada": "Fase 3. Preprocesamiento",
+              "ari_media": 0.7683,
+              "ari_desv": 0.0017,
+              "ari_min": 0.7664,
+              "ari_max": 0.7698,
+              "repeticiones": 3
+            },
+            {
+              "escenario": "Sin estandarización",
+              "fase_afectada": "Fase 4. Transformación",
+              "ari_media": 0.1597,
+              "ari_desv": 0.0001,
+              "ari_min": 0.1596,
+              "ari_max": 0.1597,
+              "repeticiones": 3
+            },
+            {
+              "escenario": "k=2 fijado sin evaluación",
+              "fase_afectada": "Fase 5. Minería",
+              "ari_media": 0.0198,
+              "ari_desv": 0.0,
+              "ari_min": 0.0198,
+              "ari_max": 0.0198,
+              "repeticiones": 3
+            }
+          ],
+          "detalle": [
+            {
+              "escenario": "Duplicados 5% (limpieza omitida)",
+              "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+              "semilla": 42,
+              "ari": 0.9655,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Duplicados 5% (limpieza omitida)",
+              "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+              "semilla": 7,
+              "ari": 0.9657,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Duplicados 5% (limpieza omitida)",
+              "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+              "semilla": 2024,
+              "ari": 0.9686,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Nulos 10% imputados con 0",
+              "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+              "semilla": 42,
+              "ari": 0.7698,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Nulos 10% imputados con 0",
+              "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+              "semilla": 7,
+              "ari": 0.7686,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Nulos 10% imputados con 0",
+              "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+              "semilla": 2024,
+              "ari": 0.7664,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Sin filtrar estados no realizados",
+              "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+              "semilla": 42,
+              "ari": 0.8631,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Sin filtrar estados no realizados",
+              "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+              "semilla": 7,
+              "ari": 0.86,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Sin filtrar estados no realizados",
+              "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+              "semilla": 2024,
+              "ari": 0.8615,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3. Preprocesamiento"
+            },
+            {
+              "escenario": "Ruido ±20% en precio (20% filas)",
+              "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+              "semilla": 42,
+              "ari": 0.9836,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3-4. Calidad y transformación"
+            },
+            {
+              "escenario": "Ruido ±20% en precio (20% filas)",
+              "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+              "semilla": 7,
+              "ari": 0.9824,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3-4. Calidad y transformación"
+            },
+            {
+              "escenario": "Ruido ±20% en precio (20% filas)",
+              "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+              "semilla": 2024,
+              "ari": 0.9792,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 3-4. Calidad y transformación"
+            },
+            {
+              "escenario": "Sin estandarización",
+              "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+              "semilla": 42,
+              "ari": 0.1596,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
+              "escenario": "Sin estandarización",
+              "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+              "semilla": 7,
+              "ari": 0.1597,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
+              "escenario": "Sin estandarización",
+              "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+              "semilla": 2024,
+              "ari": 0.1597,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
+              "escenario": "k=2 fijado sin evaluación",
+              "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+              "semilla": 42,
+              "ari": 0.0198,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 5. Minería"
+            },
+            {
+              "escenario": "k=2 fijado sin evaluación",
+              "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+              "semilla": 7,
+              "ari": 0.0198,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 5. Minería"
+            },
+            {
+              "escenario": "k=2 fijado sin evaluación",
+              "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+              "semilla": 2024,
+              "ari": 0.0198,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 5. Minería"
+            }
+          ]
+        }
+      },
+      "decisions": [
+        "La evaluación no se limita a la inercia: se reportan silhouette, Davies-Bouldin, Calinski-Harabasz y estabilidad bootstrap con ARI.",
+        "Las etiquetas se validan como únicas y se vinculan a un perfil de negocio; dos clusters no pueden compartir la misma etiqueta."
+      ],
+      "warnings": [],
+      "error": null
+    },
+    {
+      "phase": 7,
+      "title": "Presentación y uso del conocimiento",
+      "status": "ok",
+      "duration_s": 0.005,
+      "metrics": {
+        "ingreso_en_riesgo_usd": 10567705.4,
+        "potencial_crecimiento_usd": 16953138.7,
+        "impacto_estimado_total_usd": 3348942.11,
+        "criterio_impacto": "Estimaciones conservadoras basadas en tasas de reactivación/crecimiento declaradas por segmento. No son una proyección financiera garantizada; deben validarse con un piloto y con el área comercial.",
+        "segmentos_priorizados": [
+          {
+            "segmento": "VIP Leales",
+            "prioridad": "Máxima",
+            "impacto_estimado_usd": 1206320.38
+          },
+          {
+            "segmento": "VIP Elite",
+            "prioridad": "Máxima",
+            "impacto_estimado_usd": 1083610.68
+          },
+          {
+            "segmento": "Potenciales de Crecimiento",
+            "prioridad": "Alta",
+            "impacto_estimado_usd": 847656.94
+          },
+          {
+            "segmento": "Ocasionales Inactivos",
+            "prioridad": "Media",
+            "impacto_estimado_usd": 122905.18
+          },
+          {
+            "segmento": "Cazadores de Ofertas",
+            "prioridad": "Media",
+            "impacto_estimado_usd": 88448.93
+          }
+        ]
+      },
+      "decisions": [
+        "Cada segmento tiene prioridad, acciones, KPI, riesgo e impacto estimado con supuestos explícitos; el impacto debe validarse con un piloto.",
+        "El conocimiento se entrega en JSON y Markdown para integrarse en un sistema de información o en un tablero de seguimiento."
+      ],
+      "warnings": [],
+      "error": null
+    }
+  ]
+}

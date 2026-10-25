@@ -1,194 +1,131 @@
-# Amazon Sales Data Analysis - Wiki
+# Proyecto KDD — Segmentación de clientes de una tienda en línea
 
-This wiki documents the architecture, modules, and usage of the Amazon Sales Data Analysis project.
+Este repositorio implementa las **siete fases del proceso KDD** (*Knowledge
+Discovery in Databases*) sobre un dataset de ventas de una tienda en línea. El
+objetivo no es solo ejecutar K-Means, sino documentar cómo cada fase transforma
+los datos y qué decisiones metodológicas permiten (o impiden) convertir los
+resultados en conocimiento accionable.
 
-## Table of Contents
+El ensayo académico completo está en
+[`propuesta_PDF.md`](../../propuesta_PDF.md); la evidencia técnica generada por
+el pipeline está en [`docs/results/`](../results/) y las figuras en
+[`docs/images/`](../images/).
 
-1. [Getting Started](#getting-started)
-2. [Project Structure](#project-structure)
-3. [Modules Overview](#modules-overview)
-4. [Machine Learning Pipeline](#machine-learning-pipeline)
-5. [Configuration](#configuration)
-6. [Running Tests](#running-tests)
-7. [Contributing](#contributing)
-8. [License](#license)
+## Pregunta de investigación
 
----
+¿Cómo se aplican las fases del proceso KDD en un caso práctico de minería de
+datos y cuál es su impacto en la generación de conocimiento útil para la toma de
+decisiones?
 
-## Getting Started
+## Las siete fases y su implementación
 
-### Prerequisites
+| Fase KDD | Módulo principal | Evidencia generada |
+|---|---|---|
+| 1. Comprensión del dominio | `main.py`, `src/config/settings.py` | Pregunta, objetivos y criterios de éxito |
+| 2. Selección de datos | `src/data/data_loader.py` | `perfil_dataset.json` |
+| 3. Limpieza y preprocesamiento | `src/data/data_cleaner.py` | `reporte_limpieza.json` |
+| 4. Transformación y reducción | `src/data/transformation.py`, `src/clustering/pca.py` | `reporte_transformacion.json`, `acp_varianza.png` |
+| 5. Minería de datos | `src/clustering/kmeans.py`, `src/analysis/evaluation.py`, `src/analysis/association.py` | `seleccion_k.png`, `reglas_asociacion.json` |
+| 6. Interpretación y evaluación | `src/clustering/segmentation.py`, `src/experiments/degradation.py` | `evaluacion_clustering.json`, `experimento_degradacion.json` |
+| 7. Uso del conocimiento | `src/kdd/knowledge.py`, `src/reports/kdd_report.py` | `conocimiento_acciones.md`, `reporte_kdd.md` |
 
-- Python 3.8 or later
-- `pip`
+El registro cronológico de las fases, con decisiones, advertencias y métricas,
+se guarda en [`kdd_log.json`](../results/kdd_log.json) y se renderiza en
+[`kdd_fases.md`](../results/kdd_fases.md).
 
-### Installation
+## Estructura del proyecto
 
-```bash
-git clone <repository-url>
-cd analisis-de-datos
-
-python -m venv venv
-venv\Scripts\activate    # Windows
-source venv/bin/activate # Linux / macOS
-
-pip install -r requirements.txt
-```
-
-### Running the Project
-
-Run the full analysis pipeline:
-
-```bash
-python main.py
-```
-
-An interactive version of the same workflow is provided as a Jupyter notebook:
-
-```bash
-jupyter notebook notebooks/analisis_exploratorio.ipynb
-```
-
----
-
-## Project Structure
-
-```
-analisis-de-datos/
-├── main.py                 # Entry point and pipeline orchestration
-├── amazon.csv              # Dataset used for the analysis
-├── requirements.txt        # Python dependencies
-├── LICENSE                 # MIT license
+```text
+Analisis de Datos/
+├── main.py                     # Orquestador de las siete fases
+├── amazon.csv                  # Dataset de trabajo
+├── propuesta_PDF.md            # Ensayo académico (marco teórico y resultados)
 ├── src/
-│   ├── config/             # Centralized configuration
-│   ├── core/               # Formatters and display helpers
-│   ├── data/               # DataLoader and DataCleaner
-│   ├── analysis/           # EDA and statistical analyzer
-│   ├── visualization/      # Distribution and chart plotter
-│   ├── clustering/         # PCA, K-Means, and segmentation
-│   └── reports/            # Summary report generator
-├── tests/                  # pytest test suite
-├── notebooks/              # Jupyter notebooks
-└── docs/wiki/              # This documentation
+│   ├── config/                 # Parámetros metodológicos centralizados
+│   ├── data/                   # Carga, perfilado, limpieza y transformación
+│   ├── clustering/             # ACP, K-Means y segmentación
+│   ├── analysis/               # Estadística, evaluación y reglas de asociación
+│   ├── experiments/            # Experimento controlado de degradación
+│   ├── kdd/                    # Registro de fases y traducción a acciones
+│   ├── reports/                # Reporte técnico automático
+│   ├── visualization/          # Gráficos exploratorios
+│   └── core/                   # Utilidades de formato y guardado de figuras
+├── docs/
+│   ├── results/                # Evidencia JSON/Markdown del pipeline
+│   ├── images/                 # Figuras generadas
+│   └── wiki/                   # Esta documentación
+└── tests/                      # Pruebas de datos, clustering y evaluación
 ```
 
----
-
-## Modules Overview
-
-### Data Layer (`src/data/`)
-
-- **DataLoader** - loads the CSV with configured data types and date parsing, and exposes dataset information.
-- **DataCleaner** - removes duplicates, converts date columns, drops irrelevant columns, and reports missing values.
-
-### Analysis Layer (`src/analysis/`)
-
-- **ExploratoryDataAnalysis** - numeric/categorical statistics and top/bottom rankings by product, customer, category, and state.
-- **StatisticalAnalyzer** - descriptive statistics, customer aggregation, inertia analysis, cluster profiles, and cluster labeling.
-
-### Visualization Layer (`src/visualization/`)
-
-- **DistributionPlotter** - histograms and boxplots for numeric variables; categorical distributions with income overlay.
-- **ChartPlotter** - time series, correlation heatmaps, scatter matrix, ID revenue distribution, and top/bottom bar charts.
-
-### Clustering Layer (`src/clustering/`)
-
-- **PCAModel** - wraps `StandardScaler` and `PCA`, exposing loadings, explained variance, and scatter plots.
-- **KMeansModel** - wraps `sklearn` K-Means with configurable parameters, plus the elbow method and inertia decomposition.
-- **CustomerSegmenter** - orchestrates aggregation, standardization, PCA, K-Means, labeling, and segment visualizations.
-
-### Reports Layer (`src/reports/`)
-
-- **ReportGenerator** - prints data information and ranking summaries to the console.
-
----
-
-## Machine Learning Pipeline
-
-`CustomerSegmenter` implements the end-to-end segmentation workflow:
-
-1. Aggregate sales per customer: total income, average ticket, frequency, average discount, and days since last purchase.
-2. Standardize features (center and scale).
-3. Reduce dimensionality with PCA (default 2 components).
-4. Cluster with K-Means (k-means++, multiple initialization, configurable k).
-5. Compute relative cluster profiles against the global mean.
-6. Assign business labels automatically.
-
-### Segment Labels
-
-| Segment | Relative profile condition |
-|---|---|
-| Premium (High Value) | Income > 1.2x, frequency > 1.2x, recency < 0.8x |
-| Frequent (Loyal) | Frequency > 1.1x |
-| Occasional (Price Sensitive) | Average discount > 1.05x |
-| Inactive (At Risk) | Everything else |
-
-Each segment is diagnosed through radar charts, cluster distribution pies, PCA scatter with correlation circles, and product-level top/bottom analysis.
-
----
-
-## Results & Conclusions
-
-The following figures are produced by a full run of `python main.py` over `amazon.csv`. The full numeric summary is available in `docs/conclusions_summary.json`, and the detailed analysis lives in the project [README](../../README.md#results--conclusions).
-
-| Metric | Value |
-|---|---|
-| Records | 100,000 |
-| Unique customers | 30,243 |
-| Total revenue | USD 132,424,396.57 |
-| Variance explained by PC1 + PC2 | 66.0% |
-
-![Customer segments in PCA space](../images/segmentation_pca_clusters.png)
-
-*Customer segments projected on PC1/PC2 with the loading circle.*
-
-Key findings:
-
-- The ~19.5% of customers in the two premium clusters generate about 75% of total revenue.
-- Around 80% of customers are low-frequency and low-spend (Occasional and Inactive), representing the main retention opportunity.
-- Two clusters currently receive the same automatic label (Premium), a candidate for refining the labeling thresholds.
-
----
-
-## Configuration
-
-`src/config/settings.py` centralizes all tunable parameters:
-
-- `DATASET`, `DTYPES`, `COLS_TO_DROP` - data source and cleaning behavior
-- `NUMERIC_VARS`, `CATEGORICAL_VARS`, `ID_VARS` - analysis targets
-- `CLUSTERING_VARS` - the behavioral features used by the clustering pipeline
-- `KMEANS_CONFIG` - number of clusters, initialization, `n_init`, `max_iter`, random state
-- `PCA_CONFIG` - number of components and random state
-- `PLOT_STYLE`, `FIGURE_SIZES` - global matplotlib styling
-
-Change these values to alter the analysis without touching pipeline code.
-
----
-
-## Running Tests
+## Ejecución
 
 ```bash
-pytest tests/
+python -m pip install -r requirements.txt
+
+# Pipeline completo (incluye selección de k y experimento de degradación)
+python main.py
+
+# Modo rápido: k fijo, sin experimento
+python main.py --quick --no-experiment
 ```
 
-Run a specific test file:
+El pipeline es reproducible: la recencia se calcula contra la fecha máxima del
+dataset (`2024-12-29`), no contra la fecha del sistema. Las semillas y los
+umbrales están en `src/config/settings.py`.
+
+## Decisiones metodológicas clave
+
+1. **El dataset es sintético.** El perfilado detecta 100 000 filas exactas, cero
+   nulos, cero duplicados, filas anuales casi uniformes y un único producto por
+   pedido. Se declara como simulación y se analiza como caso de estudio, no como
+   evidencia del mercado real.
+2. **`TotalAmount` ignora el descuento.** Se recalcula
+   `Ingreso_Neto = Quantity × UnitPrice × (1 − Discount)` y se cuantifica la
+   sobreestimación del dataset original (USD 9 241 433,05).
+3. **Las devoluciones y cancelaciones se excluyen** del análisis de valor. Los
+   pedidos sin cliente identificable se conservan en el perfilado, pero no en la
+   base analítica.
+4. **K-Means trabaja con las cinco variables estandarizadas** (ingreso, ticket,
+   frecuencia, recencia y descuento), no con dos componentes del ACP. El ACP se
+   usa para visualización y diagnóstico.
+5. **`k` no se fija a priori.** Se evalúa `k = 2..10` con codo, silhouette,
+   Davies-Bouldin, Calinski-Harabasz y tamaño mínimo de cluster. Se elige `k = 5`
+   (silhouette = 0,318; Davies-Bouldin = 0,884). Ningún `k` de 3 a 6 alcanzó el
+   5 % mínimo por cluster, por lo que el umbral se relajó al 1 % técnico y se
+   conservó el micro-segmento **VIP Elite** (1,29 % de clientes, 34,78 % del
+   ingreso). La relajación queda registrada en el reporte.
+6. **La estabilidad se mide con bootstrap (ARI).** El agrupamiento final alcanza
+   un ARI medio de 0,981, por encima del umbral de 0,70.
+7. **Las reglas de asociación son un complemento exploratorio.** Cada pedido
+   contiene un solo producto, por lo que Apriori a nivel de pedido no es
+   aplicable; se calculan co-ocurrencias a nivel de cliente y se justifica la
+   decisión en el informe.
+
+## Evidencia y resultados
+
+- [`reporte_kdd.md`](../results/reporte_kdd.md): reporte técnico completo.
+- [`segmentos.json`](../results/segmentos.json): perfiles, tamaños e ingresos.
+- [`evaluacion_clustering.json`](../results/evaluacion_clustering.json):
+  métricas, estabilidad y comparación de alternativas.
+- [`experimento_degradacion.json`](../results/experimento_degradacion.json):
+  efecto de duplicados, nulos y ruido sobre el ARI.
+- [`conocimiento_acciones.md`](../results/conocimiento_acciones.md): acciones,
+  KPI y riesgos por segmento.
+
+## Pruebas
 
 ```bash
-pytest tests/test_clustering.py
+python -m pytest -q
 ```
 
----
+Las pruebas cubren perfilado y limpieza, métricas de selección de `k`,
+estabilidad bootstrap, etiquetado único de segmentos y registro de fases.
 
-## Contributing
+## Limitaciones
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes and keep the test suite green.
-4. Update the documentation if the public behavior changes.
-5. Submit a pull request.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
+- El dataset es sintético y no representa el comportamiento real de Amazon.
+- Cada pedido contiene un solo producto, lo que impide un análisis de canasta
+  clásico.
+- La segmentación es descriptiva, no causal: los segmentos orientan decisiones,
+  pero no demuestran el efecto de una campaña.
+- El ingreso se analiza en USD corrientes, sin ajuste inflacionario.

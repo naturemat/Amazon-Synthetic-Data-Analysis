@@ -1,0 +1,211 @@
+{
+  "pregunta": "¿Cuánto se degradan los segmentos si se omite o ejecuta mal una fase?",
+  "metrica": "Adjusted Rand Index (ARI) contra la solución de referencia",
+  "k_referencia": 5,
+  "fecha_corte": "2024-12-29",
+  "umbral_estabilidad": 0.7,
+  "referencia_ari": 1.0,
+  "resumen": [
+    {
+      "escenario": "Ruido ±20% en precio (20% filas)",
+      "fase_afectada": "Fase 3-4. Calidad y transformación",
+      "ari_media": 0.9817,
+      "ari_desv": 0.0023,
+      "ari_min": 0.9792,
+      "ari_max": 0.9836,
+      "repeticiones": 3
+    },
+    {
+      "escenario": "Duplicados 5% (limpieza omitida)",
+      "fase_afectada": "Fase 3. Preprocesamiento",
+      "ari_media": 0.9666,
+      "ari_desv": 0.0017,
+      "ari_min": 0.9655,
+      "ari_max": 0.9686,
+      "repeticiones": 3
+    },
+    {
+      "escenario": "Sin filtrar estados no realizados",
+      "fase_afectada": "Fase 3. Preprocesamiento",
+      "ari_media": 0.8615,
+      "ari_desv": 0.0016,
+      "ari_min": 0.86,
+      "ari_max": 0.8631,
+      "repeticiones": 3
+    },
+    {
+      "escenario": "Nulos 10% imputados con 0",
+      "fase_afectada": "Fase 3. Preprocesamiento",
+      "ari_media": 0.7683,
+      "ari_desv": 0.0017,
+      "ari_min": 0.7664,
+      "ari_max": 0.7698,
+      "repeticiones": 3
+    },
+    {
+      "escenario": "Sin estandarización",
+      "fase_afectada": "Fase 4. Transformación",
+      "ari_media": 0.1597,
+      "ari_desv": 0.0001,
+      "ari_min": 0.1596,
+      "ari_max": 0.1597,
+      "repeticiones": 3
+    },
+    {
+      "escenario": "k=2 fijado sin evaluación",
+      "fase_afectada": "Fase 5. Minería",
+      "ari_media": 0.0198,
+      "ari_desv": 0.0,
+      "ari_min": 0.0198,
+      "ari_max": 0.0198,
+      "repeticiones": 3
+    }
+  ],
+  "detalle": [
+    {
+      "escenario": "Duplicados 5% (limpieza omitida)",
+      "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+      "semilla": 42,
+      "ari": 0.9655,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Duplicados 5% (limpieza omitida)",
+      "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+      "semilla": 7,
+      "ari": 0.9657,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Duplicados 5% (limpieza omitida)",
+      "descripcion": "Se duplican aleatoriamente 5% de las filas y se agregan sin depurar.",
+      "semilla": 2024,
+      "ari": 0.9686,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Nulos 10% imputados con 0",
+      "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+      "semilla": 42,
+      "ari": 0.7698,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Nulos 10% imputados con 0",
+      "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+      "semilla": 7,
+      "ari": 0.7686,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Nulos 10% imputados con 0",
+      "descripcion": "Se reemplazan 10% de valores numéricos por nulos y luego por cero.",
+      "semilla": 2024,
+      "ari": 0.7664,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Sin filtrar estados no realizados",
+      "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+      "semilla": 42,
+      "ari": 0.8631,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Sin filtrar estados no realizados",
+      "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+      "semilla": 7,
+      "ari": 0.86,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Sin filtrar estados no realizados",
+      "descripcion": "Se incluyen pedidos cancelados, devueltos y pendientes en ingreso y recencia.",
+      "semilla": 2024,
+      "ari": 0.8615,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3. Preprocesamiento"
+    },
+    {
+      "escenario": "Ruido ±20% en precio (20% filas)",
+      "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+      "semilla": 42,
+      "ari": 0.9836,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3-4. Calidad y transformación"
+    },
+    {
+      "escenario": "Ruido ±20% en precio (20% filas)",
+      "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+      "semilla": 7,
+      "ari": 0.9824,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3-4. Calidad y transformación"
+    },
+    {
+      "escenario": "Ruido ±20% en precio (20% filas)",
+      "descripcion": "Se perturba el precio unitario en 20% de las filas antes de agregar.",
+      "semilla": 2024,
+      "ari": 0.9792,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 3-4. Calidad y transformación"
+    },
+    {
+      "escenario": "Sin estandarización",
+      "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+      "semilla": 42,
+      "ari": 0.1596,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Sin estandarización",
+      "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+      "semilla": 7,
+      "ari": 0.1597,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Sin estandarización",
+      "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
+      "semilla": 2024,
+      "ari": 0.1597,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "k=2 fijado sin evaluación",
+      "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+      "semilla": 42,
+      "ari": 0.0198,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 5. Minería"
+    },
+    {
+      "escenario": "k=2 fijado sin evaluación",
+      "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+      "semilla": 7,
+      "ari": 0.0198,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 5. Minería"
+    },
+    {
+      "escenario": "k=2 fijado sin evaluación",
+      "descripcion": "Se elige k=2 a priori en lugar del k seleccionado con métricas.",
+      "semilla": 2024,
+      "ari": 0.0198,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 5. Minería"
+    }
+  ],
+  "figura": "D:\\Personal_projects\\Analisis de Datos\\docs\\images\\experimento_degradacion.png"
+}

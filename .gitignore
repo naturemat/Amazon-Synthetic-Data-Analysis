@@ -5,22 +5,11 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
 .installed.cfg
-*.egg
 
-# Virtual environments
+# Entornos virtuales
 venv/
 env/
 ENV/
@@ -31,44 +20,37 @@ ENV/
 .idea/
 *.swp
 *.swo
-*~
 
-# Jupyter
+# Jupyter (el notebook exploratorio original no se mantiene con la API actual)
 .ipynb_checkpoints/
-*.ipynb
+notebooks/
 
-# Data files (keep amazon.csv)
-*.csv
-*.xlsx
-*.xls
-*.json
-!docs/conclusions_summary.json
-*.parquet
-
-# Output plots
+# Salidas temporales (la evidencia de docs/ sí se versiona)
 output/
-*.png
-!docs/images/*.png
-*.jpg
-*.jpeg
-*.pdf
-*.svg
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
 *.log
-
-# Test
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Environment
+# Datos crudos: se conserva el dataset del proyecto
+*.csv
+!amazon.csv
+!docs/results/*.md
+
+# Figuras y métricas: se versionan las de docs/
+*.png
+!docs/images/*.png
+*.json
+!docs/results/*.json
+!docs/kdd_log.json
+
+# Documentos generados que no son evidencia
+*.pdf
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Entorno
 .env
 .env.local
-
-# Documentation build
-docs/_build/

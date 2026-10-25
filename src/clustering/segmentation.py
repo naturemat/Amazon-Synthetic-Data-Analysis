@@ -1,427 +1,346 @@
 """
-Customer segmentation module for Amazon Sales Data Analysis.
-Combines PCA, K-Means, and visualization for customer segmentation.
+Segmentación de clientes e interpretación de clusters (fases 5 y 6 de KDD).
+
+Combina la matriz estandarizada, K-Means y el perfil de cliente para producir
+segmentos con etiquetas únicas, tabla de perfiles, métricas de validación y
+figuras para el documento.
+
+La etiqueta no se asigna con umbrales fijos sobre una sola variable: se parte
+del cuadrante valor/recencia y se desempata con frecuencia, ticket o descuento.
+Así se evita el error de dos clusters con la misma etiqueta.
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Optional, List, Dict, Tuple
+from __future__ import annotations
 
-from .pca import PCAModel
+import json
+from collections import Counter
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.patches import Circle
+
+from ..analysis.evaluation import bootstrap_stability, final_metrics
+from ..config.settings import CLUSTERING_VARS, RESULTS_DIR
+from ..core.plotting import save_figure
 from .kmeans import KMeansModel
-from ..config.settings import CLUSTERING_VARS
-from ..core.formatters import get_formatter, human_format_detailed
 
 
 class CustomerSegmenter:
-    """Handles customer segmentation using PCA and K-Means."""
-    
-    def __init__(self, df: pd.DataFrame, original_df: pd.DataFrame,
+    """Ejecuta K-Means, valida la solución y traduce clusters a segmentos."""
+
+    def __init__(self, features: pd.DataFrame, model_matrix: pd.DataFrame,
                  clustering_vars: Optional[List[str]] = None):
-        """
-        Initialize the CustomerSegmenter.
-        
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Cleaned dataframe
-        original_df : pd.DataFrame
-            Original dataframe (for joins)
-        clustering_vars : list, optional
-            Variables to use for clustering
-        """
-        self._df = df
-        self._original_df = original_df
-        self._clustering_vars = clustering_vars or CLUSTERING_VARS
-        
-        self._clientes_agg: Optional[pd.DataFrame] = None
-        self._pca_model: Optional[PCAModel] = None
-        self._kmeans_model: Optional[KMeansModel] = None
-        self._segment_labels: Dict[int, str] = {}
-    
-    def prepare_customer_data(self) -> pd.DataFrame:
-        """
-        Aggregate data by customer for clustering.
-        
-        Returns
-        -------
-        pd.DataFrame
-            Aggregated customer data
-        """
-        print("\n" + "="*80)
-        print("SELECCIÓN DE VARIABLES PARA CLUSTERIZACIÓN")
-        print("="*80)
-        
-        self._clientes_agg = self._df.groupby('CustomerID').agg({
-            'TotalAmount': ['sum', 'mean', 'count'],
-            'Quantity': 'sum',
-            'Discount': 'mean',
-            'UnitPrice': 'mean',
-            'OrderDate': 'max'
-        }).round(2)
-        
-        self._clientes_agg.columns = [
-            'Ingreso_Total', 'Ticket_Promedio', 'Frecuencia',
-            'Cantidad_Total', 'Descuento_Promedio',
-            'Precio_Promedio', 'Ultima_Compra'
-        ]
-        
-        self._clientes_agg['Dias_Ultima_Compra'] = (
-            pd.Timestamp.now() - self._clientes_agg['Ultima_Compra']
-        ).dt.days
-        
-        print(f"Clientes analizados: {len(self._clientes_agg)}")
-        
-        return self._clientes_agg
-    
-    def perform_clustering(self, n_clusters: int = 4) -> pd.DataFrame:
-        """
-        Perform PCA and K-Means clustering.
-        
-        Parameters
-        ----------
-        n_clusters : int
-            Number of clusters
-        
-        Returns
-        -------
-        pd.DataFrame
-            Customer data with segment labels
-        """
-        if self._clientes_agg is None:
-            self.prepare_customer_data()
-        
-        # Standardization
-        print("\n" + "="*80)
-        print("ESTANDARIZACIÓN - CENTRAR Y REDUCIR")
-        print("="*80)
-        
-        self._pca_model = PCAModel(n_components=2)
-        X_pca = self._pca_model.fit_transform(self._clientes_agg[self._clustering_vars])
-        
-        print(self._pca_model.scaler.mean_)
-        print("\n")
-        print(pd.DataFrame(
-            self._pca_model.scaler.transform(self._clientes_agg[self._clustering_vars].fillna(0)),
-            columns=self._clustering_vars,
-            index=self._clientes_agg.index
-        ).describe().loc[['mean', 'std']])
-        
-        # PCA summary
-        self._pca_model.print_summary()
-        
-        loadings = self._pca_model.get_loadings(self._clustering_vars)
-        print(loadings)
-        
-        # Plot PCA without clustering
-        print("\nGRÁFICA ACP DE CLIENTES (Sin Clustering)")
-        self._pca_model.plot_pca_scatter()
-        
-        # K-Means
-        print("\n" + "="*80)
-        print("K-MEANS")
-        print("="*80)
-        
-        self._kmeans_model = KMeansModel(n_clusters=n_clusters)
-        labels = self._kmeans_model.fit_predict(X_pca)
-        
-        self._clientes_agg['Segmento'] = labels
-        
-        # Inertia analysis
-        self._kmeans_model.print_inertia_analysis(X_pca)
-        
-        return self._clientes_agg
-    
-    def assign_segment_labels(self) -> Dict[int, str]:
-        """
-        Assign labels to segments based on their profile.
-        
-        Returns
-        -------
-        dict
-            Mapping of segment to label
-        """
-        if self._clientes_agg is None:
-            raise ValueError("Run perform_clustering first")
-        
-        perfil_segmentos = self._clientes_agg.groupby('Segmento')[self._clustering_vars].mean()
-        perfil_relativo = perfil_segmentos / self._clientes_agg[self._clustering_vars].mean()
-        
-        self._segment_labels = {}
-        
-        for seg, row in perfil_relativo.iterrows():
-            # Premium: alto ingreso + alta frecuencia + reciente
-            if (row['Ingreso_Total'] > 1.2 and 
-                row['Frecuencia'] > 1.2 and 
-                row['Dias_Ultima_Compra'] < 0.8):
-                self._segment_labels[seg] = 'PREMIUM (Alto Valor)'
-            
-            # Frecuentes: alta frecuencia
-            elif row['Frecuencia'] > 1.1:
-                self._segment_labels[seg] = 'FRECUENTES (Leales)'
-            
-            # Ocasionales / Sensibles al precio
-            elif row['Descuento_Promedio'] > 1.05:
-                self._segment_labels[seg] = 'OCASIONALES (Sensibles Precio)'
-            
-            # Inactivos
+        if len(features) != len(model_matrix):
+            raise ValueError("features y model_matrix deben tener el mismo número de filas.")
+        self.features = features.copy()
+        self.X = model_matrix.copy()
+        self.clustering_vars = clustering_vars or CLUSTERING_VARS
+        self.kmeans_model: Optional[KMeansModel] = None
+        self.labels: Optional[np.ndarray] = None
+        self.label_map: Dict[int, str] = {}
+        self.evaluation: Dict[str, Any] = {}
+        self.selection: Dict[str, Any] = {}
+
+    # ------------------------------------------------------------------- fit
+    def fit(self, k: Optional[int] = None, evaluate: bool = True) -> Dict[str, Any]:
+        """Ajusta K-Means; si k es None lo selecciona con métricas."""
+        X = self.X.values
+        if evaluate:
+            probe = KMeansModel()
+            selection = probe.select_n_clusters(X)
+            if k is None:
+                k = selection["k_seleccionado"]
             else:
-                self._segment_labels[seg] = 'INACTIVOS (Riesgo Pérdida)'
-        
-        print("\nEtiquetas asignadas automáticamente (flexible):")
-        for k, v in self._segment_labels.items():
-            print(f"Cluster {k}: {v}")
-        
-        return self._segment_labels
-    
-    def plot_pca_with_clusters(self, X_pca: np.ndarray) -> None:
-        """
-        Plot PCA with cluster visualization and correlation circle.
-        
-        Parameters
-        ----------
-        X_pca : np.ndarray
-            PCA-transformed data
-        """
-        print("PCA + CLUSTERS + CÍRCULO DE CORRELACIONES")
-        
-        loadings = self._pca_model.get_loadings(self._clustering_vars)
-        
-        centroids = self._kmeans_model.centroids
-        explained_var = self._pca_model.explained_variance_ratio
-        
-        fig, ax = plt.subplots(figsize=(9, 8))
-        
-        # PCA + Clusters
-        for c in range(self._kmeans_model.n_clusters):
-            ax.scatter(
-                X_pca[self._clientes_agg['Segmento'] == c, 0],
-                X_pca[self._clientes_agg['Segmento'] == c, 1],
-                label=self._segment_labels.get(c, f'Cluster {c}'),
-                alpha=0.6
-            )
-        
-        # Centroids
-        ax.scatter(
-            centroids[:, 0],
-            centroids[:, 1],
-            marker='X',
-            s=200,
-            color='black',
-            label='Centroides'
-        )
-        
-        ax.set_xlabel(f"PC1 ({explained_var[0]*100:.1f}%)")
-        ax.set_ylabel(f"PC2 ({explained_var[1]*100:.1f}%)")
-        ax.set_title("Segmentación de Clientes (PCA + Círculo de Correlaciones)")
-        ax.grid(alpha=0.3)
-        
-        # Save PCA limits
-        xlim = ax.get_xlim()
-        ylim = ax.get_ylim()
-        
-        # Correlation circle
-        circle_scale = min(
-            (xlim[1] - xlim[0]),
-            (ylim[1] - ylim[0])
-        ) * 0.9
-        
-        theta = np.linspace(0, 2*np.pi, 300)
-        
-        ax.plot(
-            circle_scale * np.cos(theta),
-            circle_scale * np.sin(theta),
-            linestyle='--',
-            color='gray',
-            alpha=0.6
-        )
-        
-        # Loading vectors
-        for var in loadings.index:
-            x = loadings.loc[var, 'PC1'] * circle_scale
-            y = loadings.loc[var, 'PC2'] * circle_scale
-            
-            ax.arrow(
-                0, 0, x, y,
-                color='black',
-                width=0.0,
-                head_width=circle_scale * 0.06,
-                length_includes_head=True,
-                alpha=0.85
-            )
-            
-            ax.text(
-                x * 1.1,
-                y * 1.1,
-                var,
-                fontsize=9,
-                ha='center',
-                va='center'
-            )
-        
-        # Base axes
-        ax.axhline(0, color='black', linewidth=0.5)
-        ax.axvline(0, color='black', linewidth=0.5)
-        
-        # Force PCA range
-        ax.set_xlim(-10, 30)
-        ax.set_ylim(-10, 10)
-        
-        ax.legend()
-        plt.tight_layout()
-        plt.show()
-    
-    def plot_cluster_distribution(self) -> None:
-        """Plot pie charts for cluster distribution."""
-        # Record distribution by cluster
-        df_full = self._df.merge(
-            self._original_df[['ProductID', 'ProductName']].drop_duplicates(),
-            on='ProductID',
-            how='left'
-        )
-        
-        record_counts = []
-        
-        for c in range(self._kmeans_model.n_clusters):
-            cluster_customers = self._clientes_agg[self._clientes_agg['Segmento'] == c].index
-            n_records = df_full[df_full['CustomerID'].isin(cluster_customers)].shape[0]
-            record_counts.append(n_records)
-        
-        record_counts = np.array(record_counts)
-        record_labels = [f"Cluster {i}\n{self._segment_labels[i]}" for i in range(self._kmeans_model.n_clusters)]
-        
-        # Pie chart - records
-        plt.figure(figsize=(8, 8))
-        plt.pie(
-            record_counts,
-            labels=record_labels,
-            autopct='%1.1f%%',
-            startangle=90,
-            colors=plt.cm.tab10.colors[:self._kmeans_model.n_clusters],
-            wedgeprops={'edgecolor': 'black'}
-        )
-        plt.title("Distribución de registros por segmento (K-Means)")
-        plt.show()
-        
-        # Pie chart - segments
-        segment_counts = self._clientes_agg['Segmento'].value_counts().sort_index()
-        segment_labels = [f"Cluster {i}\n{self._segment_labels[i]}" for i in segment_counts.index]
-        
-        plt.figure(figsize=(8, 8))
-        plt.pie(
-            segment_counts,
-            labels=segment_labels,
-            autopct='%1.1f%%',
-            startangle=90,
-            colors=plt.cm.tab10.colors[:len(segment_counts)],
-            wedgeprops={'edgecolor': 'black'}
-        )
-        plt.title("Distribución de clientes por segmentos (K-Means)")
-        plt.show()
-    
-    def plot_radar_chart(self) -> None:
-        """Plot radar chart for cluster profiles."""
-        # Normalized cluster means
-        cluster_means = self._clientes_agg.groupby('Segmento')[self._clustering_vars].mean()
-        cluster_means_norm = (cluster_means - cluster_means.min()) / (cluster_means.max() - cluster_means.min())
-        
-        # Angles
-        num_vars = len(self._clustering_vars)
-        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+                selection["k_usuario"] = int(k)
+                selection["k_seleccionado_por_metricas"] = selection["k_seleccionado"]
+                selection["k_seleccionado"] = int(k)
+            self.selection = selection
+            self.evaluation["seleccion_k"] = selection
+        else:
+            self.selection = {"k_seleccionado": int(k or 4),
+                              "criterio": "k fijado por el usuario"}
+            self.evaluation["seleccion_k"] = self.selection
+
+        k = int(k or self.selection["k_seleccionado"])
+        self.kmeans_model = KMeansModel(n_clusters=k)
+        self.labels = self.kmeans_model.fit_predict(X)
+        self.features["Cluster"] = self.labels
+        self.kmeans_model.print_inertia_analysis(X)
+        self.evaluation["metricas_finales"] = final_metrics(X, self.labels)
+        return self.selection
+
+    # --------------------------------------------------------------- labeling
+    def assign_segment_labels(self) -> Dict[int, str]:
+        """Asigna etiquetas únicas usando valor, recencia y desempates."""
+        if self.labels is None:
+            raise ValueError("Ejecute fit() primero.")
+
+        profile = self.features.groupby("Cluster")[self.clustering_vars].mean()
+        overall = self.features[self.clustering_vars].mean()
+        relative = (profile / overall.replace(0, np.nan)).fillna(0)
+
+        base_labels: Dict[int, str] = {}
+        for cluster, row in relative.iterrows():
+            high_value = row["Ingreso_Neto"] >= 1.0
+            recent = row["Dias_Ultima_Compra"] <= 1.0
+            if high_value and recent:
+                base = "VIP Leales"
+            elif high_value and not recent:
+                base = "VIP en Riesgo"
+            elif not high_value and recent:
+                base = "Potenciales de Crecimiento"
+            else:
+                base = "Ocasionales Inactivos"
+            base_labels[int(cluster)] = base
+
+        final: Dict[int, str] = {}
+        used: Counter = Counter()
+
+        # Agrupar clusters que comparten cuadrante para diferenciarlos por rasgo.
+        groups: Dict[str, List[int]] = {}
+        for cluster, base in base_labels.items():
+            groups.setdefault(base, []).append(cluster)
+
+        def _unique(label: str, cluster: int) -> str:
+            if used[label] == 0:
+                used[label] += 1
+                return label
+            candidate = f"{label} - C{cluster}"
+            used[candidate] += 1
+            return candidate
+
+        for base, clusters in groups.items():
+            if len(clusters) == 1:
+                final[clusters[0]] = _unique(base, clusters[0])
+                continue
+
+            if base == "VIP Leales":
+                ordered = sorted(
+                    clusters,
+                    key=lambda c: relative.loc[c, "Frecuencia"],
+                    reverse=True,
+                )
+                if relative.loc[ordered[0], "Frecuencia"] >= 1.5:
+                    final[ordered[0]] = _unique("VIP Elite", ordered[0])
+                    remaining_label = "VIP Leales"
+                else:
+                    final[ordered[0]] = _unique("VIP Leales", ordered[0])
+                    remaining_label = "VIP Leales (Ticket Alto)"
+                for cluster in ordered[1:]:
+                    final[cluster] = _unique(remaining_label, cluster)
+
+            elif base == "Ocasionales Inactivos":
+                ordered = sorted(
+                    clusters,
+                    key=lambda c: relative.loc[c, "Descuento_Promedio"],
+                    reverse=True,
+                )
+                final[ordered[0]] = _unique("Cazadores de Ofertas", ordered[0])
+                for cluster in ordered[1:]:
+                    final[cluster] = _unique("Ocasionales Inactivos", cluster)
+
+            else:
+                for cluster in clusters:
+                    final[cluster] = _unique(base, cluster)
+
+        if len(set(final.values())) != len(final):
+            raise RuntimeError(f"Etiquetas duplicadas: {final}")
+
+        self.label_map = final
+        self.features["Etiqueta"] = self.features["Cluster"].map(final)
+        return final
+
+    # --------------------------------------------------------------- profiles
+    def profile_table(self) -> pd.DataFrame:
+        """Tabla de perfil por segmento, ordenada por ingreso."""
+        if "Etiqueta" not in self.features.columns:
+            self.assign_segment_labels()
+
+        grouped = self.features.groupby(["Cluster", "Etiqueta"], observed=True)
+        rows = []
+        total_revenue = float(self.features["Ingreso_Neto"].sum())
+        total_customers = len(self.features)
+
+        for (cluster, label), group in grouped:
+            row = {
+                "Cluster": int(cluster),
+                "Etiqueta": label,
+                "Clientes": int(len(group)),
+                "Pct_Clientes": round(100 * len(group) / total_customers, 2),
+                "Ingreso_Neto": round(float(group["Ingreso_Neto"].sum()), 2),
+                "Participacion_Ingresos": round(
+                    100 * float(group["Ingreso_Neto"].sum()) / total_revenue, 2
+                ) if total_revenue else 0.0,
+                "Ticket_Promedio": round(float(group["Ticket_Promedio"].mean()), 2),
+                "Frecuencia": round(float(group["Frecuencia"].mean()), 2),
+                "Descuento_Promedio": round(float(group["Descuento_Promedio"].mean()), 4),
+                "Dias_Ultima_Compra": round(float(group["Dias_Ultima_Compra"].mean()), 1),
+                "Ingreso_Anualizado": round(float(group["Ingreso_Anualizado"].mean()), 2),
+                "R_Score": round(float(group["R_Score"].mean()), 2),
+                "F_Score": round(float(group["F_Score"].mean()), 2),
+                "M_Score": round(float(group["M_Score"].mean()), 2),
+                "Categoria_Favorita": group["Categoria_Favorita"].mode().iloc[0],
+                "Marca_Favorita": group["Marca_Favorita"].mode().iloc[0],
+                "Ciudad_Principal": group["Ciudad"].mode().iloc[0],
+                "Metodo_Pago_Principal": group["Metodo_Pago_Favorito"].mode().iloc[0],
+            }
+            rows.append(row)
+
+        table = pd.DataFrame(rows).sort_values("Ingreso_Neto", ascending=False)
+        return table.reset_index(drop=True)
+
+    def segment_summary(self) -> List[Dict[str, Any]]:
+        return self.profile_table().to_dict(orient="records")
+
+    def validate(self, n_bootstrap: int = 10) -> Dict[str, Any]:
+        """Añade estabilidad bootstrap al informe de evaluación."""
+        X = self.X.values
+        k = int(self.kmeans_model.n_clusters)
+        stability = bootstrap_stability(X, k, n_iter=n_bootstrap)
+        self.evaluation["estabilidad"] = stability
+        self.evaluation["etiquetas"] = {str(k): v for k, v in self.label_map.items()}
+        self.evaluation["perfil"] = self.segment_summary()
+        return self.evaluation
+
+    # ------------------------------------------------------------------ plots
+    def plot_pca_clusters(self, pca_model, name: str = "clusters_pca") -> str:
+        """Dispersión PCA con centroides, etiquetas y círculo de correlaciones."""
+        if self.labels is None:
+            raise ValueError("Ejecute fit() primero.")
+        X_pca = pca_model._X_pca
+        var = pca_model.explained_variance_ratio
+        fig, ax = plt.subplots(figsize=(10, 8))
+        cmap = plt.get_cmap("tab10", len(self.label_map))
+
+        for cluster in sorted(self.label_map):
+            mask = self.labels == cluster
+            ax.scatter(X_pca[mask, 0], X_pca[mask, 1], s=10, alpha=0.45,
+                       color=cmap(cluster), label=self.label_map[cluster])
+
+        centroids_pca = pca_model.pca.transform(self.kmeans_model.centroids)
+        ax.scatter(centroids_pca[:, 0], centroids_pca[:, 1], marker="X", s=220,
+                   color="black", edgecolor="white", linewidth=1.2,
+                   label="Centroides", zorder=5)
+
+        loadings = pca_model.get_loadings(self.clustering_vars)
+        limit = max(np.abs(X_pca[:, :2]).max(), 1e-6) * 0.95
+        ax.add_patch(Circle((0, 0), radius=limit * 0.55, fill=False, color="gray",
+                            linestyle="--", linewidth=1, alpha=0.7))
+        for var_name in loadings.index:
+            x = loadings.loc[var_name, "PC1"] * limit * 0.55
+            y = loadings.loc[var_name, "PC2"] * limit * 0.55
+            ax.arrow(0, 0, x, y, color="#333333", width=0.0,
+                     head_width=limit * 0.035, length_includes_head=True, alpha=0.8)
+            ax.text(x * 1.08, y * 1.08, var_name, fontsize=8, ha="center", va="center")
+
+        ax.axhline(0, color="black", linewidth=0.4)
+        ax.axvline(0, color="black", linewidth=0.4)
+        ax.set_xlabel(f"PC1 ({var[0] * 100:.2f}%)")
+        ax.set_ylabel(f"PC2 ({var[1] * 100:.2f}%)")
+        ax.set_title("Segmentos de clientes en el plano PCA")
+        ax.legend(fontsize=8, markerscale=2, loc="best")
+        ax.grid(alpha=0.25)
+        fig.tight_layout()
+        return save_figure(fig, name)
+
+    def plot_radar(self, name: str = "perfil_radar") -> str:
+        """Radar normalizado de los perfiles de segmento."""
+        if "Etiqueta" not in self.features.columns:
+            self.assign_segment_labels()
+        means = self.features.groupby("Etiqueta")[self.clustering_vars].mean()
+        normalized = (means - means.min()) / (means.max() - means.min()).replace(0, 1)
+
+        angles = np.linspace(0, 2 * np.pi, len(self.clustering_vars), endpoint=False).tolist()
         angles += angles[:1]
-        
-        plt.figure(figsize=(8, 8))
-        ax = plt.subplot(111, polar=True)
-        
-        ax.set_rscale('linear')
-        ax.set_ylim(0, 1.1)
-        
-        plt.xticks(angles[:-1], self._clustering_vars, fontsize=10)
-        
-        colors = plt.cm.tab10.colors
-        for i, row in cluster_means_norm.iterrows():
-            values = row.tolist()
-            values += values[:1]
-            ax.plot(angles, values, color=colors[i], linewidth=2, 
-                   label=f"Cluster {i} ({self._segment_labels[i]})")
-            ax.fill(angles, values, color=colors[i], alpha=0.25)
-        
-        ax.yaxis.grid(True, color='gray', linestyle='--', alpha=0.5)
-        ax.xaxis.grid(True, color='gray', linestyle='--', alpha=0.5)
-        
-        plt.title("Perfil de clusters (Radar / Estrella)", size=14, y=1.1)
-        plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
-        plt.tight_layout()
-        plt.show()
-    
-    def plot_cluster_details(self) -> None:
-        """Plot detailed charts for each cluster."""
-        df_full = self._df.merge(
-            self._original_df[['ProductID', 'ProductName']].drop_duplicates(),
-            on='ProductID',
-            how='left'
+        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={"polar": True})
+        colors = plt.get_cmap("tab10", len(normalized))
+
+        for i, (label, row) in enumerate(normalized.iterrows()):
+            values = row.tolist() + [row.tolist()[0]]
+            ax.plot(angles, values, linewidth=2, label=label, color=colors(i))
+            ax.fill(angles, values, alpha=0.12, color=colors(i))
+
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(self.clustering_vars, fontsize=9)
+        ax.set_ylim(0, 1.05)
+        ax.set_title("Perfil relativo de cada segmento (0 = mínimo, 1 = máximo)", pad=20)
+        ax.legend(loc="upper right", bbox_to_anchor=(1.35, 1.1), fontsize=8)
+        fig.tight_layout()
+        return save_figure(fig, name)
+
+    def plot_segment_value(self, name: str = "segmentos_valor") -> str:
+        """Barras comparadas: % de clientes vs % de ingreso por segmento."""
+        table = self.profile_table().sort_values("Participacion_Ingresos", ascending=True)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        y = np.arange(len(table))
+        height = 0.38
+        ax.barh(y - height / 2, table["Pct_Clientes"], height=height,
+                label="% de clientes", color="#4c72b0")
+        ax.barh(y + height / 2, table["Participacion_Ingresos"], height=height,
+                label="% de ingreso", color="#dd8452")
+        for i, (clients, revenue) in enumerate(zip(table["Pct_Clientes"], table["Participacion_Ingresos"])):
+            ax.text(clients + 0.5, i - height / 2, f"{clients:.1f}%", va="center", fontsize=8)
+            ax.text(revenue + 0.5, i + height / 2, f"{revenue:.1f}%", va="center", fontsize=8)
+        ax.set_yticks(y)
+        ax.set_yticklabels(table["Etiqueta"], fontsize=9)
+        ax.set_xlabel("Porcentaje (%)")
+        ax.set_title("Concentración de clientes e ingreso por segmento")
+        ax.legend()
+        ax.grid(axis="x", alpha=0.3)
+        fig.tight_layout()
+        return save_figure(fig, name)
+
+    def plot_profile_heatmap(self, name: str = "perfil_relativo") -> str:
+        """Mapa de calor con el índice relativo de cada variable por segmento."""
+        table = self.profile_table().set_index("Etiqueta")
+        global_means = self.features[self.clustering_vars].mean()
+        relative = (table[self.clustering_vars] / global_means.replace(0, np.nan)).astype(float)
+
+        fig, ax = plt.subplots(figsize=(10, 5))
+        im = ax.imshow(relative.values, cmap="RdYlGn", aspect="auto", vmin=0.4, vmax=1.6)
+        ax.set_xticks(range(len(relative.columns)))
+        ax.set_xticklabels(relative.columns, rotation=20, ha="right", fontsize=9)
+        ax.set_yticks(range(len(relative.index)))
+        ax.set_yticklabels(relative.index, fontsize=9)
+        for i in range(relative.shape[0]):
+            for j in range(relative.shape[1]):
+                ax.text(j, i, f"{relative.values[i, j]:.2f}", ha="center",
+                        va="center", fontsize=8)
+        ax.set_title("Índice relativo al promedio global (1.00 = promedio)")
+        fig.colorbar(im, ax=ax, label="Índice")
+        fig.tight_layout()
+        return save_figure(fig, name)
+
+    # ----------------------------------------------------------------- export
+    def save_segments(self, path: Optional[str] = None) -> str:
+        target = Path(path or RESULTS_DIR / "segmentos.json")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "k": int(self.kmeans_model.n_clusters),
+            "etiquetas": {str(k): v for k, v in self.label_map.items()},
+            "segmentos": self.segment_summary(),
+            "evaluacion": self.evaluation,
+        }
+        target.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
         )
+        return str(target)
 
-        for c in range(self._kmeans_model.n_clusters):
-            df_cluster = df_full[self._df['CustomerID'].isin(
-                self._clientes_agg[self._clientes_agg['Segmento'] == c].index
-            )]
-            etiqueta = self._segment_labels[c]
-            
-            # Products by income
-            prod_income = df_cluster.groupby('ProductName')['TotalAmount'].sum()
-            top3 = prod_income.sort_values(ascending=False).head(3)
-            bottom3 = prod_income.sort_values(ascending=True).head(3)
-            combined = pd.concat([top3, bottom3])
-            
-            plt.figure(figsize=(12, 5))
-            ax = plt.gca()
-            sns.barplot(x=combined.index, y=combined.values, palette=['red']*3 + ['blue']*3, ax=ax)
-            plt.title(f'Cluster {c} ({etiqueta}) - Top/Bottom 3 Productos por Ingreso')
-            plt.ylabel('Total Amount')
-            plt.xlabel('Producto')
-            
-            for p in ax.patches:
-                ax.annotate(human_format_detailed(p.get_height()),
-                           (p.get_x() + p.get_width()/2., p.get_height()),
-                           ha='center', va='bottom', fontsize=9)
-            
-            plt.xticks(rotation=45, ha='right')
-            plt.tight_layout()
-            plt.show()
-    
-    def get_segmented_customers(self) -> pd.DataFrame:
-        """Get customer data with segment labels."""
-        if self._clientes_agg is None:
-            raise ValueError("Run perform_clustering first")
-        
-        return self._clientes_agg.copy()
+    def save_customers(self, path: Optional[str] = None) -> str:
+        target = Path(path or RESULTS_DIR / "clientes_segmentados.csv")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        self.features.to_csv(target, index=True, encoding="utf-8-sig")
+        return str(target)
 
 
-def segment_customers(df: pd.DataFrame, original_df: pd.DataFrame,
-                      n_clusters: int = 4) -> Tuple[CustomerSegmenter, pd.DataFrame]:
-    """
-    Convenience function to perform customer segmentation.
-    
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Cleaned dataframe
-    original_df : pd.DataFrame
-        Original dataframe
-    n_clusters : int
-        Number of clusters
-    
-    Returns
-    -------
-    tuple
-        (CustomerSegmenter, segmented_data)
-    """
-    segmenter = CustomerSegmenter(df, original_df)
-    segmenter.prepare_customer_data()
-    segmenter.perform_clustering(n_clusters)
+def segment_customers(features: pd.DataFrame, model_matrix: pd.DataFrame,
+                      k: Optional[int] = None) -> CustomerSegmenter:
+    segmenter = CustomerSegmenter(features, model_matrix)
+    segmenter.fit(k=k)
     segmenter.assign_segment_labels()
-    
-    return segmenter, segmenter.get_segmented_customers()
+    segmenter.validate()
+    return segmenter

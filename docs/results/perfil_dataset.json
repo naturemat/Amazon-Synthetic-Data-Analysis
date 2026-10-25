@@ -1,0 +1,44 @@
+{
+  "archivo": "amazon.csv",
+  "filas": 100000,
+  "columnas": 20,
+  "valores_nulos": 0,
+  "columnas_con_nulos": {},
+  "filas_duplicadas": 0,
+  "clientes_unicos": 30243,
+  "pedidos_unicos": 100000,
+  "productos_unicos": 175,
+  "vendedores_unicos": 1999,
+  "fecha_min": "2020-01-01",
+  "fecha_max": "2024-12-29",
+  "dias_cubiertos": 1824,
+  "filas_por_anio": {
+    "2020": 20066,
+    "2021": 19890,
+    "2022": 20078,
+    "2023": 20096,
+    "2024": 19870
+  },
+  "coeficiente_variacion_anual": 0.00493,
+  "maximo_items_por_pedido": 1,
+  "columnas_constantes": [
+    "Country"
+  ],
+  "estados_pedido": {
+    "Delivered": 74628,
+    "Shipped": 15192,
+    "Pending": 4103,
+    "Returned": 3049,
+    "Cancelled": 3028
+  },
+  "evidencia_dataset_simulado": [
+    "El número de filas es exactamente 100 000.",
+    "No hay valores nulos en ninguna columna.",
+    "No hay filas duplicadas exactas.",
+    "Las filas por año son casi uniformes (CV = 0.0049).",
+    "Cada pedido contiene exactamente un producto (no hay canastas).",
+    "El periodo inicia exactamente el 2020-01-01."
+  ],
+  "es_probablemente_simulado": true,
+  "conclusion_perfilado": "El dataset presenta un patrón compatible con datos simulados. Se declara así en la metodología; la actividad permite datos reales o simulados, por lo que esto no invalida el ejercicio."
+}

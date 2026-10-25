@@ -1,0 +1,110 @@
+{
+  "filas_entrada": 100000,
+  "decisiones": [
+    "Todas las fechas se interpretaron correctamente.",
+    "Duplicados exactos eliminados: 0. Quedan 100,000 filas.",
+    "No se encontraron valores faltantes; no fue necesario imputar. La fase de limpieza se documenta igualmente porque el resultado es una condición del dataset, no una omisión del proceso.",
+    "Reglas de consistencia: se eliminaron 0 filas con cantidad/precio inválido; se recortaron 0 descuentos al rango [0, 1] y se llevaron a cero los impuestos/envíos negativos.",
+    "TotalAmount del dataset no descuenta la promoción (diferencia máxima de 0.30 por redondeo). Se adopta Ingreso_Neto para el análisis y se cuantifica una sobreestimación de 9,241,433.05 USD.",
+    "Los valores atípicos se reportan con IQR (factor 3) y se conservan; en la fase 4 se recortan solo las variables de modelado al percentil 1-99.",
+    "Conjunto analítico: 89,820 ventas realizadas (Delivered, Shipped). Se excluyen 10,180 pedidos cancelados, devueltos o pendientes para no inflar ingreso ni recencia."
+  ],
+  "fechas_invalidas_eliminadas": 0,
+  "filas_despues_fechas": 100000,
+  "duplicados_eliminados": 0,
+  "filas_despues_duplicados": 100000,
+  "nulos_antes": {},
+  "total_nulos_antes": 0,
+  "nulos_imputados": {},
+  "total_nulos_despues": 0,
+  "consistencia": {
+    "filas_entrada_consistencia": 100000,
+    "filas_eliminadas_cantidad_precio": 0,
+    "cantidades_invalidas": 0,
+    "precios_invalidos": 0,
+    "descuentos_bajo_rango": 0,
+    "descuentos_sobre_rango": 0,
+    "impuestos_negativos_corregidos": 0,
+    "envios_negativos_corregidos": 0,
+    "filas_salida_consistencia": 100000
+  },
+  "ingresos": {
+    "ingreso_total_reportado": 132424396.57,
+    "ingreso_neto_con_descuento": 123182963.52,
+    "ingreso_bruto_sin_descuento": 124844263.0,
+    "impacto_descuento": 9248855.65,
+    "diferencia_total_amount_vs_neto": 9241433.05,
+    "filas_inconsistentes_total_amount": 59754,
+    "porcentaje_filas_inconsistentes": 59.754,
+    "formula_adoptada": "Ingreso_Neto = Quantity * UnitPrice * (1 - Discount); Ingreso_Facturado = Ingreso_Neto + Tax + ShippingCost"
+  },
+  "atipicos_iqr": {
+    "Quantity": {
+      "atipicos": 1293,
+      "porcentaje": 1.293,
+      "limite_inferior": -52.0,
+      "limite_superior": 81.0
+    },
+    "UnitPrice": {
+      "atipicos": 6800,
+      "porcentaje": 6.8,
+      "limite_inferior": -421.0,
+      "limite_superior": 629.0
+    },
+    "Discount": {
+      "atipicos": 0,
+      "porcentaje": 0.0,
+      "limite_inferior": -0.3,
+      "limite_superior": 0.4
+    },
+    "Tax": {
+      "atipicos": 1070,
+      "porcentaje": 1.07,
+      "limite_inferior": -224.5,
+      "limite_superior": 336.48
+    },
+    "ShippingCost": {
+      "atipicos": 0,
+      "porcentaje": 0.0,
+      "limite_inferior": -18.73,
+      "limite_superior": 33.56
+    },
+    "TotalAmount": {
+      "atipicos": 1840,
+      "porcentaje": 1.84,
+      "limite_inferior": -2883.44,
+      "limite_superior": 5085.24
+    },
+    "Ingreso_Neto": {
+      "atipicos": 1865,
+      "porcentaje": 1.865,
+      "limite_inferior": -2765.0,
+      "limite_superior": 4662.0
+    },
+    "Ingreso_Facturado": {
+      "atipicos": 1890,
+      "porcentaje": 1.89,
+      "limite_inferior": -2688.46,
+      "limite_superior": 4737.98
+    }
+  },
+  "ventas_realizadas": {
+    "estados_incluidos": [
+      "Delivered",
+      "Shipped"
+    ],
+    "filas_incluidas": 89820,
+    "filas_excluidas": 10180,
+    "porcentaje_excluido": 10.18,
+    "por_estado": {
+      "Delivered": 74628,
+      "Shipped": 15192,
+      "Pending": 4103,
+      "Returned": 3049,
+      "Cancelled": 3028
+    }
+  },
+  "filas_salida": 100000,
+  "filas_analiticas": 89820,
+  "reduccion_porcentaje": 0.0
+}

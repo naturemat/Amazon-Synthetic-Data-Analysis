@@ -2,7 +2,15 @@
 Core utilities and formatters for the Amazon Sales Data Analysis project.
 """
 
+import os
+
 import numpy as np
+import matplotlib
+
+# Batch-friendly backend: figures are saved to disk. Set MPLBACKEND to override.
+if os.environ.get("MPLBACKEND") is None:
+    matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
@@ -10,14 +18,14 @@ from matplotlib.ticker import FuncFormatter
 def human_format(x, pos=None):
     """
     Format numeric values to human-readable format (K, M, B).
-    
+
     Parameters
     ----------
     x : float
         The value to format
     pos : int, optional
         Position (for matplotlib formatter)
-    
+
     Returns
     -------
     str
@@ -34,14 +42,14 @@ def human_format(x, pos=None):
 def human_format_detailed(num, pos=None):
     """
     Format numbers with detailed units (K, M, B).
-    
+
     Parameters
     ----------
     num : float
         The value to format
     pos : int, optional
         Position (for matplotlib formatter)
-    
+
     Returns
     -------
     str
@@ -57,7 +65,7 @@ def human_format_detailed(num, pos=None):
 def configure_pandas_display():
     """Configure pandas display options for better output."""
     import pandas as pd
-    
+
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 180)
     pd.set_option('display.max_rows', 100)
@@ -66,7 +74,12 @@ def configure_pandas_display():
 
 def configure_matplotlib_style():
     """Configure matplotlib style for all plots."""
-    plt.style.use('seaborn-v0_8-darkgrid')
+    from ..config.settings import PLOT_STYLE
+
+    try:
+        plt.style.use(PLOT_STYLE)
+    except OSError:  # older matplotlib versions
+        plt.style.use("ggplot")
 
 
 def get_formatter():
@@ -82,17 +95,17 @@ def get_color_palette(n_colors=10):
 def format_currency(value, locale='es_EC'):
     """
     Format value as currency (Latin America format).
-    
+
     Parameters
     ----------
     value : float
         The monetary value
     locale : str
         Locale for formatting
-    
+
     Returns
     -------
     str
-        Formatted currency string
+        Formatted string
     """
     return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")

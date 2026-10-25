@@ -1,0 +1,180 @@
+{
+  "fecha_corte": "2024-12-29",
+  "filas_pedido": 89820,
+  "variables_modelo": [
+    "Ingreso_Neto",
+    "Ticket_Promedio",
+    "Frecuencia",
+    "Descuento_Promedio",
+    "Dias_Ultima_Compra"
+  ],
+  "clientes": 28971,
+  "recencia": {
+    "min_dias": 0,
+    "mediana_dias": 545.0,
+    "max_dias": 1824,
+    "fecha_corte": "2024-12-29",
+    "formula": "(fecha_corte - max(OrderDate del cliente)).days"
+  },
+  "estandarizacion": {
+    "winsorizacion": {
+      "Ingreso_Neto": {
+        "percentil_inferior": 0.01,
+        "percentil_superior": 0.99,
+        "limite_inferior": 79.0,
+        "limite_superior": 62784.97,
+        "valores_recortados": 567,
+        "porcentaje_recortado": 1.9571
+      },
+      "Ticket_Promedio": {
+        "percentil_inferior": 0.01,
+        "percentil_superior": 0.99,
+        "limite_inferior": 79.0,
+        "limite_superior": 2640.7149,
+        "valores_recortados": 569,
+        "porcentaje_recortado": 1.964
+      },
+      "Frecuencia": {
+        "percentil_inferior": 0.01,
+        "percentil_superior": 0.99,
+        "limite_inferior": 1.0,
+        "limite_superior": 40.0,
+        "valores_recortados": 284,
+        "porcentaje_recortado": 0.9803
+      }
+    },
+    "antes": {
+      "Ingreso_Neto": {
+        "min": 10.8,
+        "max": 301605.65,
+        "media": 3584.683971902937,
+        "desv_est": 11914.033004654093
+      },
+      "Ticket_Promedio": {
+        "min": 10.8,
+        "max": 6456.599999999999,
+        "media": 789.6027363571944,
+        "desv_est": 566.5664979643337
+      },
+      "Frecuencia": {
+        "min": 1.0,
+        "max": 113.0,
+        "media": 3.100341721031376,
+        "desv_est": 7.138854839271341
+      },
+      "Descuento_Promedio": {
+        "min": 0.0,
+        "max": 0.3,
+        "media": 0.07379935441482266,
+        "desv_est": 0.06587742962002541
+      },
+      "Dias_Ultima_Compra": {
+        "min": 0.0,
+        "max": 1824.0,
+        "media": 661.2869421145283,
+        "desv_est": 509.4266405416505
+      }
+    },
+    "despues": {
+      "Ingreso_Neto": {
+        "min": 79.0,
+        "max": 62784.96999999959,
+        "media": 3115.6921145283172,
+        "desv_est": 7420.114328078257
+      },
+      "Ticket_Promedio": {
+        "min": 79.0,
+        "max": 2640.714857142857,
+        "media": 784.3140102713658,
+        "desv_est": 542.6443738427222
+      },
+      "Frecuencia": {
+        "min": 1.0,
+        "max": 40.0,
+        "media": 2.825894860377619,
+        "desv_est": 4.504206654486656
+      },
+      "Descuento_Promedio": {
+        "min": 0.0,
+        "max": 0.3,
+        "media": 0.07379935441482266,
+        "desv_est": 0.06587742962002541
+      },
+      "Dias_Ultima_Compra": {
+        "min": 0.0,
+        "max": 1824.0,
+        "media": 661.2869421145283,
+        "desv_est": 509.4266405416505
+      }
+    }
+  },
+  "medias_escalador": {
+    "Ingreso_Neto": 3115.6921,
+    "Ticket_Promedio": 784.314,
+    "Frecuencia": 2.8259,
+    "Descuento_Promedio": 0.0738,
+    "Dias_Ultima_Compra": 661.2869
+  },
+  "desviaciones_escalador": {
+    "Ingreso_Neto": 7419.9863,
+    "Ticket_Promedio": 542.635,
+    "Frecuencia": 4.5041,
+    "Descuento_Promedio": 0.0659,
+    "Dias_Ultima_Compra": 509.4178
+  },
+  "acp": {
+    "varianza_explicada": [
+      0.4879,
+      0.2031,
+      0.1688,
+      0.1372,
+      0.0031
+    ],
+    "varianza_acumulada": [
+      0.4879,
+      0.691,
+      0.8598,
+      0.9969,
+      1.0
+    ],
+    "componentes_para_85pct": 3,
+    "varianza_2_componentes": 0.691,
+    "cargas": {
+      "PC1": {
+        "Ingreso_Neto": 0.609,
+        "Ticket_Promedio": 0.4206,
+        "Frecuencia": 0.5898,
+        "Descuento_Promedio": -0.0246,
+        "Dias_Ultima_Compra": -0.3221
+      },
+      "PC2": {
+        "Ingreso_Neto": 0.055,
+        "Ticket_Promedio": -0.1901,
+        "Frecuencia": 0.0927,
+        "Descuento_Promedio": 0.9746,
+        "Dias_Ultima_Compra": -0.0491
+      },
+      "PC3": {
+        "Ingreso_Neto": 0.2842,
+        "Ticket_Promedio": -0.0934,
+        "Frecuencia": 0.2719,
+        "Descuento_Promedio": -0.014,
+        "Dias_Ultima_Compra": 0.9145
+      },
+      "PC4": {
+        "Ingreso_Neto": -0.1526,
+        "Ticket_Promedio": 0.8741,
+        "Frecuencia": -0.327,
+        "Descuento_Promedio": 0.2222,
+        "Dias_Ultima_Compra": 0.2373
+      },
+      "PC5": {
+        "Ingreso_Neto": 0.7225,
+        "Ticket_Promedio": -0.1187,
+        "Frecuencia": -0.6803,
+        "Descuento_Promedio": -0.001,
+        "Dias_Ultima_Compra": -0.0345
+      }
+    }
+  }
+}
