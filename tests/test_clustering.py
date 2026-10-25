@@ -6,6 +6,7 @@ import json
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.analysis.association import MarketBasketAnalyzer
 from src.analysis.evaluation import (
@@ -17,6 +18,7 @@ from src.analysis.evaluation import (
 )
 from src.clustering.kmeans import KMeansModel
 from src.clustering.segmentation import CustomerSegmenter
+from src.experiments.degradation import DegradationExperiment
 from src.kdd.knowledge import build_knowledge_payload, build_playbook_markdown
 from src.kdd.phase_logger import KDDLogger
 
@@ -95,6 +97,29 @@ def test_segment_labels_are_unique_and_complete(cleaned_orders):
     assert set(segmenter.features["Etiqueta"]) == set(labels.values())
     table = segmenter.profile_table()
     assert table["Clientes"].sum() == len(features)
+
+
+def test_degradation_requires_per_customer_labels(cleaned_orders):
+    from src.data.transformation import CustomerTransformer
+
+    sales = cleaned_orders.analytical_data
+    transformer = CustomerTransformer(sales)
+    features = transformer.aggregate()
+    matrix = transformer.prepare_model_features()
+
+    segmenter = CustomerSegmenter(features, matrix)
+    segmenter.fit(k=2, evaluate=False)
+
+    with pytest.raises(ValueError, match="una etiqueta por cliente"):
+        DegradationExperiment(
+            sales_df=sales,
+            full_df=cleaned_orders.data,
+            reference_features=features,
+            reference_model=matrix,
+            reference_labels=segmenter.assign_segment_labels(),
+            k=2,
+            cutoff=cleaned_orders.data["OrderDate"].max(),
+        )
 
 
 def test_association_diagnoses_single_item_orders(cleaned_orders):

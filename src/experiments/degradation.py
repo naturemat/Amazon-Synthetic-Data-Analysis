@@ -33,6 +33,7 @@ from ..config.settings import (
     DEGRADATION_NOISE_RATE,
     DEGRADATION_NULL_RATE,
     DEGRADATION_SEEDS,
+    DEGRADATION_SYSTEM_DATE,
     RANDOM_STATE,
     RESULTS_DIR,
     STABILITY_ARI_THRESHOLD,
@@ -86,6 +87,7 @@ class DegradationExperiment:
         self.reference_labels = reference_labels
         self.k = int(k)
         self.cutoff = pd.Timestamp(cutoff)
+        self.system_cutoff = pd.Timestamp(DEGRADATION_SYSTEM_DATE)
         self.seeds = seeds or DEGRADATION_SEEDS
         self.rows: List[Dict[str, Any]] = []
         self.summary: Optional[pd.DataFrame] = None
@@ -171,6 +173,7 @@ class DegradationExperiment:
             "Nulos 10% imputados con 0": "Fase 3. Preprocesamiento",
             "Sin filtrar estados no realizados": "Fase 3. Preprocesamiento",
             "Ruido ±20% en precio (20% filas)": "Fase 3-4. Calidad y transformación",
+            "Recencia con la fecha del sistema": "Fase 4. Transformación",
             "Sin estandarización": "Fase 4. Transformación",
         }
         return mapping.get(name, "Fase 5. Minería")
@@ -196,6 +199,27 @@ class DegradationExperiment:
             "Se perturba el precio unitario en 20% de las filas antes de agregar.",
             self._noise,
         )
+
+        # Escenario de recencia: se usa la fecha del sistema en lugar del máximo
+        # del dataset. Es el error que el pipeline evita en la fase 4.
+        for seed in self.seeds:
+            features, scaled, _ = _features_for(self.sales, self.system_cutoff)
+            labels = KMeans(
+                n_clusters=self.k, init="k-means++", n_init=10,
+                max_iter=300, random_state=seed,
+            ).fit_predict(scaled.values)
+            ari, n_common = self._ari(features, labels)
+            self.rows.append({
+                "escenario": "Recencia con la fecha del sistema",
+                "descripcion": (
+                    "Se calcula la recencia contra la fecha del sistema "
+                    f"({self.system_cutoff.date()}) en lugar del máximo del dataset."
+                ),
+                "semilla": seed,
+                "ari": round(ari, 4) if not np.isnan(ari) else None,
+                "clientes_evaluados": int(n_common),
+                "fase_afectada": "Fase 4. Transformación",
+            })
 
         # Escenario de transformación: mismos datos, sin estandarizar.
         for seed in self.seeds:
@@ -279,6 +303,7 @@ class DegradationExperiment:
             "metrica": "Adjusted Rand Index (ARI) contra la solución de referencia",
             "k_referencia": self.k,
             "fecha_corte": self.cutoff.date().isoformat(),
+            "fecha_sistema_usada": self.system_cutoff.date().isoformat(),
             "umbral_estabilidad": STABILITY_ARI_THRESHOLD,
             "referencia_ari": 1.0,
             "resumen": self.summary.to_dict(orient="records"),

@@ -3,9 +3,19 @@
   "metrica": "Adjusted Rand Index (ARI) contra la solución de referencia",
   "k_referencia": 5,
   "fecha_corte": "2024-12-29",
+  "fecha_sistema_usada": "2026-10-25",
   "umbral_estabilidad": 0.7,
   "referencia_ari": 1.0,
   "resumen": [
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "fase_afectada": "Fase 4. Transformación",
+      "ari_media": 0.9945,
+      "ari_desv": 0.0049,
+      "ari_min": 0.9904,
+      "ari_max": 1.0,
+      "repeticiones": 3
+    },
     {
       "escenario": "Ruido ±20% en precio (20% filas)",
       "fase_afectada": "Fase 3-4. Calidad y transformación",
@@ -157,6 +167,30 @@
       "ari": 0.9792,
       "clientes_evaluados": 28971,
       "fase_afectada": "Fase 3-4. Calidad y transformación"
+    },
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 42,
+      "ari": 1.0,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 7,
+      "ari": 0.9932,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 2024,
+      "ari": 0.9904,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
     },
     {
       "escenario": "Sin estandarización",

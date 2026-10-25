@@ -26,7 +26,7 @@
 - **Objetivo:** Proteger y retener el ingreso concentrado.
 - **KPI:** Retención, ingreso por cliente y días entre compras.
 - **Riesgo:** La pérdida de pocos clientes afecta una porción grande del ingreso.
-- **Supuesto de impacto:** Retención adicional del 3 % anual del ingreso del segmento.
+- **Supuesto de impacto:** Retención adicional del 3 % del ingreso histórico del segmento.
 - **Acciones:**
   1. Programa de fidelización con atención preferente y beneficios exclusivos.
   2. Contacto proactivo antes de su ciclo habitual de compra.
@@ -38,7 +38,7 @@
 - **Objetivo:** Retener a los clientes de máxima frecuencia y valor.
 - **KPI:** Retención, frecuencia, ticket y participación en el ingreso.
 - **Riesgo:** Concentración extrema: pocos clientes explican una parte crítica del ingreso.
-- **Supuesto de impacto:** Retención adicional del 3 % anual del ingreso del segmento.
+- **Supuesto de impacto:** Retención adicional del 3 % del ingreso histórico del segmento.
 - **Acciones:**
   1. Gestión de cuenta dedicada y beneficios exclusivos no replicables.
   2. Contacto proactivo antes de su ciclo habitual de compra.

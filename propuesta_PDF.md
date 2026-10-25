@@ -4,7 +4,8 @@
 **Facultad:** [Facultad]  
 **Asignatura:** Minería de Datos  
 **Docente:** [Nombre del docente]  
-**Fecha:** 25 de octubre de 2026
+**Fecha:** 25 de octubre de 2026  
+**Título breve (encabezado):** KDD EN LA SEGMENTACIÓN DE CLIENTES
 
 ---
 
@@ -208,12 +209,12 @@ La unidad de análisis es el **cliente**, obtenido al agregar los pedidos por
 
 ### 5.4 Herramientas y reproducibilidad
 
-Se utilizó Python 3.13 con `pandas` para la manipulación de datos, `scikit-learn`
-para estandarización, ACP, K-Means y métricas, y `matplotlib` para las figuras.
-La semilla se fijó en 42. El pipeline se ejecuta con `python main.py` y genera
-un registro JSON por fase, figuras y reportes en `docs/`. Cada decisión
-metodológica está parametrizada en `src/config/settings.py` para que el
-resultado sea auditable.
+Se utilizó Python 3.13 con `pandas` 2.3.3 para la manipulación de datos,
+`scikit-learn` 1.9.0 para estandarización, ACP, K-Means y métricas, y
+`matplotlib` 3.9.3 para las figuras. La semilla se fijó en 42. El pipeline se
+ejecuta con `python main.py` y genera un registro JSON por fase, figuras y
+reportes en `docs/`. Cada decisión metodológica está parametrizada en
+`src/config/settings.py` para que el resultado sea auditable.
 
 ### 5.5 Consideraciones éticas
 
@@ -305,7 +306,9 @@ con `pd.Timestamp.now()`. Eso hace que el resultado cambie cada día y que, con 
 dataset que termina en 2024, todos los clientes parezcan inactivos. En este
 proyecto la recencia se calcula contra `OrderDate.max()`, es decir, el
 **29 de diciembre de 2024**. La recencia resultante va de 0 a 1 824 días, con
-mediana de 545 días.
+mediana de 545 días. El experimento de la sección 7.5 muestra que usar la fecha
+del sistema casi no altera la partición (ARI = 0,994) porque el desplazamiento es
+constante, pero corrompe la lectura absoluta; por eso se corrige igualmente.
 
 **Recorte de colas.** `Ingreso_Neto`, `Ticket_Promedio` y `Frecuencia` tienen
 colas largas. Se recortaron al percentil 1-99 solo para el modelado: 567
@@ -365,8 +368,8 @@ segmentación accionable, por lo que quedó fuera del rango de decisión.
 El método del codo se ejecutó y se graficó, pero se usó como diagnóstico
 complementario, no como única justificación. La inercia siempre disminuye al
 aumentar k, por lo que por sí sola no permite elegir. La inercia intraclase de
-la solución final fue 40 297,12 (27,82 % de la inercia total), lo que deja
-72,18 % de la variabilidad explicada por la separación entre segmentos.
+la solución final fue 40 297,12 (27,82 % de la inercia total); el 72,18 %
+restante corresponde a la separación entre segmentos.
 
 Como complemento se ejecutó un análisis de asociación. El diagnóstico confirmó
 que cada pedido tiene un solo producto, por lo que Apriori clásico no aplica. Se
@@ -394,21 +397,21 @@ VIP Elite, VIP Leales, Potenciales de Crecimiento, Ocasionales Inactivos y
 Cazadores de Ofertas.
 
 La solución de k = 5 obtuvo silhouette = 0,318, Davies-Bouldin = 0,884 y
-Calinski-Harabasz = 18 789,41. La estabilidad bootstrap se midió con 10
-remuestreos al 80 % de entrenamiento y evaluación sobre las filas no vistas: el
-ARI promedio fue 0,981 (desviación 0,009; mínimo 0,969; máximo 0,994), muy por
-encima del umbral de 0,70. Es decir, los segmentos se reproducen cuando cambia la
-muestra. Esa estabilidad es necesaria, pero no suficiente: mide consistencia del
-algoritmo, no validez de negocio.
+Calinski-Harabasz = 18 789,41, con un ARI bootstrap de 0,981 (mínimo 0,969) en
+10 remuestreos. Los valores se detallan en la sección 7.3. Esa estabilidad es
+necesaria, pero no suficiente: mide consistencia del algoritmo, no validez de
+negocio.
 
 Además, se ejecutó un **experimento controlado de degradación**. Se construyó
 una solución de referencia con el pipeline completo y luego se introdujeron
 errores en distintas fases: duplicados (5 %), nulos imputados con cero (10 %),
-inclusión de pedidos no realizados, ruido de ±20 % en el precio, eliminación de
-la estandarización y fijación de k = 2 sin evaluación. Para cada escenario se
-repitió K-Means con el mismo k y se midió el ARI contra la referencia. Así, la
-afirmación "omitir fases degrada el resultado" se convierte en evidencia
-cuantificada y no en una opinión.
+inclusión de pedidos no realizados, ruido de ±20 % en el precio, recencia
+calculada con la fecha del sistema, eliminación de la estandarización y fijación
+de k = 2 sin evaluación. Para cada escenario se
+repitió K-Means con el k de referencia, salvo el escenario que evalúa
+precisamente k = 2, y se midió el ARI contra la referencia. Así, la afirmación
+"omitir fases degrada el resultado" se convierte en evidencia cuantificada y no
+en una opinión.
 
 ### 6.7 Fase 7. Uso del conocimiento
 
@@ -417,12 +420,14 @@ KPI, riesgo e impacto estimado. Las estimaciones son conservadoras y declaran su
 supuesto: retención adicional del 3 % del ingreso en los dos segmentos VIP,
 aumento del 5 % en Potenciales de Crecimiento y reactivación del 2 % en
 Ocasionales Inactivos y Cazadores de Ofertas. El impacto total estimado es de
-USD 3 348 942,11 anuales, distribuido entre acciones de retención, crecimiento y
-reactivación selectiva. No es una proyección financiera garantizada; es una
+USD 3 348 942,11, calculado sobre el ingreso histórico de cada segmento y
+distribuido entre acciones de retención, crecimiento y reactivación selectiva. No es una proyección financiera garantizada; es una
 hipótesis de trabajo para un piloto. El pipeline también cuantificó un ingreso en
 riesgo de **USD 10 567 705,40** (Ocasionales Inactivos + Cazadores de Ofertas) y
 tomó el ingreso actual de Potenciales de Crecimiento (USD 16 953 138,70) como base
-para estimar un aumento del 5 % por mayor frecuencia.
+para estimar un aumento del 5 % por mayor frecuencia. El ingreso en riesgo se
+define aquí como el de los segmentos de baja actividad; el ingreso premium se
+protege con retención y no se contabiliza como pérdida realizada.
 
 El conocimiento se exportó en JSON y Markdown para que pueda integrarse en un
 tablero o en un sistema de información. La fase 7 no termina con una tabla:  
@@ -504,6 +509,7 @@ umbral de estabilidad adoptado es 0,70.
 
 | Escenario | Fase afectada | ARI medio | Desv. | Lectura |
 |---|---|---:|---:|---|
+| Recencia con fecha del sistema | Transformación | 0,994 | 0,005 | La partición se mantiene; la lectura absoluta se corrompe |
 | Ruido ±20 % en precio | Calidad / transformación | 0,982 | 0,002 | La membresía resiste, pero el ingreso se altera |
 | Duplicados 5 % | Preprocesamiento | 0,967 | 0,002 | La membresía resiste, pero conteos e ingreso se inflan |
 | Sin filtrar estados | Preprocesamiento | 0,862 | 0,002 | Cambio moderado; incluye ingreso no realizado |
@@ -519,6 +525,16 @@ granularidad, no porque el algoritmo falle. En cambio, duplicados y ruido
 conservan la membresía (ARI > 0,96) porque K-Means es robusto a perturbaciones
 pequeñas, pero **sesgan los totales**: más pedidos, más frecuencia y más ingreso
 por cliente. Los nulos imputados con cero se acercan al umbral (0,768).
+
+La recencia con la fecha del sistema es un caso especial. Para que el escenario
+sea reproducible, la fecha del sistema se fijó en el 25 de octubre de 2026
+(fecha de ejecución del ensayo); en producción sería la fecha real de consulta.
+El ARI es 0,994 porque sumar una constante a todos los clientes se cancela al
+estandarizar: la partición se mantiene, pero la recencia absoluta se corrompe.
+Los 36 días del VIP Elite pasarían a más de 700, y cualquier regla de negocio
+basada en días ("contactar antes de 60 días") quedaría inválida. Es un error de
+interpretación, no de membresía; por eso el pipeline fija la fecha de corte en el
+máximo del dataset y no en la fecha del sistema.
 
 La lección no es que "todas las fases valgan lo mismo", sino que el ARI mide una
 sola dimensión del daño. Un tablero puede exhibir un ARI alto y, al mismo tiempo,
@@ -552,10 +568,11 @@ recencia) afectan más que los errores de **algoritmo**, pero el experimento
 permite distinguir dos tipos de daño. El primero es el **cambio de partición**,
 que el ARI sí mide: la falta de estandarización (ARI = 0,160) y la fijación de
 k = 2 (ARI = 0,020) producen agrupamientos distintos. El segundo es el **sesgo de
-magnitudes**, que el ARI no captura: duplicar 5 % de las filas o añadir ruido al
-precio deja casi intacta la membresía (ARI > 0,96), pero infla pedidos, frecuencia
-e ingreso. Un tablero podría mostrar segmentos "estables" y, al mismo tiempo,
-cifras de negocio equivocadas.
+magnitudes**, que el ARI no captura: duplicar 5 % de las filas, añadir ruido al
+precio o desplazar la recencia con la fecha del sistema deja casi intacta la
+membresía (ARI > 0,96), pero infla pedidos, frecuencia e ingreso o corrompe la
+lectura temporal. Un tablero podría mostrar segmentos "estables" y, al mismo
+tiempo, cifras de negocio equivocadas.
 
 Por eso la evaluación de la fase 6 no puede reducirse a una métrica de partición.
 En este proyecto se combinaron silhouette, Davies-Bouldin, Calinski-Harabasz,
@@ -579,7 +596,11 @@ comparando totales y perfiles, no solo observando el ARI.
 5. **Impacto estimado con supuestos.** Las tasas de retención y reactivación son
    hipótesis conservadoras; deben validarse con un piloto y con el área
    comercial.
-6. **Asociación limitada.** Al no haber canastas, las reglas de co-compra son
+6. **Segmento élite pequeño.** VIP Elite representa 1,29 % de los clientes (375
+   personas) y concentra 34,78 % del ingreso. Se mantuvo separado por su valor
+   estratégico, aunque su tamaño exige prudencia: un solo cliente extremo puede
+   mover sus promedios y cualquier campaña debe evaluarse caso por caso.
+7. **Asociación limitada.** Al no haber canastas, las reglas de co-compra son
    un complemento exploratorio y no permiten recomendaciones de *basket*.
 
 ### 8.4 Relación con CRISP-DM y con los sistemas de información

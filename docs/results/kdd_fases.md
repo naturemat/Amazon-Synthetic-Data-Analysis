@@ -1,6 +1,6 @@
 # Reporte de ejecución del proceso KDD
 
-Generado: 2026-10-25T08:41:03  
+Generado: 2026-10-25T09:05:13  
 Python: 3.13.0  
 Plataforma: Windows-10-10.0.19045-SP0
 
@@ -10,17 +10,17 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 | Fase | Nombre | Estado | Duración (s) | Métricas | Alertas |
 |---|---|---|---|---|---|
-| 1 | Comprensión del dominio y definición del objetivo | ok | 0.0 | 5 | 0 |
-| 2 | Selección de datos | ok | 3.995 | 11 | 1 |
-| 3 | Preprocesamiento y limpieza | ok | 1.869 | 14 | 1 |
-| 4 | Transformación y reducción | ok | 9.02 | 10 | 1 |
-| 5 | Minería de datos | ok | 123.142 | 7 | 1 |
-| 6 | Interpretación y evaluación | ok | 116.42 | 5 | 0 |
-| 7 | Presentación y uso del conocimiento | ok | 0.005 | 5 | 0 |
+| 1 | Comprensión del dominio y definición del objetivo | ok | 0.001 | 5 | 0 |
+| 2 | Selección de datos | ok | 2.625 | 11 | 1 |
+| 3 | Preprocesamiento y limpieza | ok | 0.89 | 14 | 1 |
+| 4 | Transformación y reducción | ok | 5.202 | 10 | 1 |
+| 5 | Minería de datos | ok | 74.007 | 7 | 1 |
+| 6 | Interpretación y evaluación | ok | 90.316 | 5 | 0 |
+| 7 | Presentación y uso del conocimiento | ok | 0.004 | 5 | 0 |
 
 ## Fase 1. Comprensión del dominio y definición del objetivo
 
-**Estado:** `ok` · **Duración:** 0.0 s
+**Estado:** `ok` · **Duración:** 0.001 s
 
 ### Métricas
 
@@ -48,7 +48,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 2. Selección de datos
 
-**Estado:** `ok` · **Duración:** 3.995 s
+**Estado:** `ok` · **Duración:** 2.625 s
 
 ### Métricas
 
@@ -86,7 +86,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 3. Preprocesamiento y limpieza
 
-**Estado:** `ok` · **Duración:** 1.869 s
+**Estado:** `ok` · **Duración:** 0.89 s
 
 ### Métricas
 
@@ -128,7 +128,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 4. Transformación y reducción
 
-**Estado:** `ok` · **Duración:** 9.02 s
+**Estado:** `ok` · **Duración:** 5.202 s
 
 ### Métricas
 
@@ -205,7 +205,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 5. Minería de datos
 
-**Estado:** `ok` · **Duración:** 123.142 s
+**Estado:** `ok` · **Duración:** 74.007 s
 
 ### Métricas
 
@@ -253,11 +253,11 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ### Advertencias
 
-- Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster: la estructura natural contiene un segmento élite de 1,29 % (375 clientes) que concentra 34,78 % del ingreso. Se relajó el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la relajación queda registrada en la evaluación.
+- Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster (el menor: 1.29 %). La estructura natural contiene un segmento élite pequeño que concentra una parte crítica del ingreso. Se relajó el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la relajación queda registrada en la evaluación.
 
 ## Fase 6. Interpretación y evaluación
 
-**Estado:** `ok` · **Duración:** 116.42 s
+**Estado:** `ok` · **Duración:** 90.316 s
 
 ### Métricas
 
@@ -423,6 +423,15 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 {
   "resumen": [
     {
+      "escenario": "Recencia con la fecha del sistema",
+      "fase_afectada": "Fase 4. Transformación",
+      "ari_media": 0.9945,
+      "ari_desv": 0.0049,
+      "ari_min": 0.9904,
+      "ari_max": 1.0,
+      "repeticiones": 3
+    },
+    {
       "escenario": "Ruido ±20% en precio (20% filas)",
       "fase_afectada": "Fase 3-4. Calidad y transformación",
       "ari_media": 0.9817,
@@ -575,6 +584,30 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
       "fase_afectada": "Fase 3-4. Calidad y transformación"
     },
     {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 42,
+      "ari": 1.0,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 7,
+      "ari": 0.9932,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
+      "escenario": "Recencia con la fecha del sistema",
+      "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+      "semilla": 2024,
+      "ari": 0.9904,
+      "clientes_evaluados": 28971,
+      "fase_afectada": "Fase 4. Transformación"
+    },
+    {
       "escenario": "Sin estandarización",
       "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
       "semilla": 42,
@@ -633,7 +666,7 @@ Este archivo es evidencia automática de la aplicación de las siete fases del p
 
 ## Fase 7. Presentación y uso del conocimiento
 
-**Estado:** `ok` · **Duración:** 0.005 s
+**Estado:** `ok` · **Duración:** 0.004 s
 
 ### Métricas
 

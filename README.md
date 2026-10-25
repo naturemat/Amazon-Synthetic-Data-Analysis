@@ -107,9 +107,9 @@ Salidas principales:
    complemento exploratorio.
 9. **La evaluación no se limita a la inercia.** Se reportan silhouette,
    Davies-Bouldin, Calinski-Harabasz y estabilidad bootstrap con ARI.
-10. **El experimento de degradación** inyecta duplicados, nulos, ruido y errores
-    de transformación para medir con ARI cuánto se alejan los segmentos de la
-    solución de referencia.
+10. **El experimento de degradación** inyecta duplicados, nulos, ruido, recencia
+    con fecha del sistema y errores de transformación para medir con ARI cuánto
+    se alejan los segmentos de la solución de referencia.
 
 ## Resultados principales (k = 5)
 
@@ -124,8 +124,9 @@ Salidas principales:
 - 17,93 % de los clientes (VIP Elite + VIP Leales) genera 73,50 % del ingreso.
 - Estabilidad bootstrap: ARI medio = 0,981 (mínimo 0,969, 10 remuestreos).
 - Experimento de degradación: sin estandarización ARI = 0,160; k = 2 ARI = 0,020;
-  nulos imputados con cero ARI = 0,768. Duplicados y ruido preservan la partición
-  (ARI > 0,96) pero sesgan los totales.
+  nulos imputados con cero ARI = 0,768. Duplicados, ruido y recencia con fecha del
+  sistema preservan la partición (ARI > 0,96) pero sesgan los totales o la lectura
+  temporal.
 
 ## Limitaciones
 

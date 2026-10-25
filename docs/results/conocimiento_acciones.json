@@ -36,7 +36,7 @@
       ],
       "kpi": "Retención, ingreso por cliente y días entre compras.",
       "riesgo": "La pérdida de pocos clientes afecta una porción grande del ingreso.",
-      "supuesto_impacto": "Retención adicional del 3 % anual del ingreso del segmento.",
+      "supuesto_impacto": "Retención adicional del 3 % del ingreso histórico del segmento.",
       "impacto_estimado_usd": 1206320.38
     },
     {
@@ -67,7 +67,7 @@
       ],
       "kpi": "Retención, frecuencia, ticket y participación en el ingreso.",
       "riesgo": "Concentración extrema: pocos clientes explican una parte crítica del ingreso.",
-      "supuesto_impacto": "Retención adicional del 3 % anual del ingreso del segmento.",
+      "supuesto_impacto": "Retención adicional del 3 % del ingreso histórico del segmento.",
       "impacto_estimado_usd": 1083610.68
     },
     {

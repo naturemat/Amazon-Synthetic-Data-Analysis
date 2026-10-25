@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-25T08:41:03",
-  "finished_at": "2026-10-25T08:45:20",
+  "generated_at": "2026-10-25T09:05:13",
+  "finished_at": "2026-10-25T09:08:08",
   "environment": {
     "python": "3.13.0",
     "platform": "Windows-10-10.0.19045-SP0"
@@ -10,7 +10,7 @@
       "phase": 1,
       "title": "Comprensión del dominio y definición del objetivo",
       "status": "ok",
-      "duration_s": 0.0,
+      "duration_s": 0.001,
       "metrics": {
         "pregunta_investigacion": "¿Qué segmentos de clientes existen según su valor, frecuencia, sensibilidad al descuento y recencia, y cómo debe priorizar la organización sus acciones de retención y crecimiento?",
         "objetivo_general": "Segmentar la base de clientes de una tienda en línea y traducir los segmentos en acciones comerciales priorizadas, cuantificando el ingreso en riesgo y el potencial de crecimiento.",
@@ -36,7 +36,7 @@
       "phase": 2,
       "title": "Selección de datos",
       "status": "ok",
-      "duration_s": 3.995,
+      "duration_s": 2.625,
       "metrics": {
         "filas": 100000,
         "columnas": 20,
@@ -70,7 +70,7 @@
       "phase": 3,
       "title": "Preprocesamiento y limpieza",
       "status": "ok",
-      "duration_s": 1.869,
+      "duration_s": 0.89,
       "metrics": {
         "filas_entrada": 100000,
         "filas_limpias": 100000,
@@ -108,7 +108,7 @@
       "phase": 4,
       "title": "Transformación y reducción",
       "status": "ok",
-      "duration_s": 9.02,
+      "duration_s": 5.202,
       "metrics": {
         "clientes_agregados": 28971,
         "fecha_corte_recencia": "2024-12-29",
@@ -173,7 +173,7 @@
       "phase": 5,
       "title": "Minería de datos",
       "status": "ok",
-      "duration_s": 123.142,
+      "duration_s": 74.007,
       "metrics": {
         "k_seleccionado": 5,
         "criterio_k": "Mayor silhouette entre k=3..6. Ningún k alcanzó el 5% mínimo por cluster; la restricción se relajó al 1% técnico y se documenta. Desempate por menor Davies-Bouldin.",
@@ -209,7 +209,7 @@
         "No se usa Apriori clásico: no hay canastas multi-producto. Se calculan reglas de co-compra a nivel de cliente como complemento exploratorio."
       ],
       "warnings": [
-        "Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster: la estructura natural contiene un segmento élite de 1,29 % (375 clientes) que concentra 34,78 % del ingreso. Se relajó el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la relajación queda registrada en la evaluación."
+        "Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster (el menor: 1.29 %). La estructura natural contiene un segmento élite pequeño que concentra una parte crítica del ingreso. Se relajó el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la relajación queda registrada en la evaluación."
       ],
       "error": null
     },
@@ -217,7 +217,7 @@
       "phase": 6,
       "title": "Interpretación y evaluación",
       "status": "ok",
-      "duration_s": 116.42,
+      "duration_s": 90.316,
       "metrics": {
         "metricas_finales": {
           "n_clusters": 5,
@@ -365,6 +365,15 @@
         ],
         "experimento_degradacion": {
           "resumen": [
+            {
+              "escenario": "Recencia con la fecha del sistema",
+              "fase_afectada": "Fase 4. Transformación",
+              "ari_media": 0.9945,
+              "ari_desv": 0.0049,
+              "ari_min": 0.9904,
+              "ari_max": 1.0,
+              "repeticiones": 3
+            },
             {
               "escenario": "Ruido ±20% en precio (20% filas)",
               "fase_afectada": "Fase 3-4. Calidad y transformación",
@@ -518,6 +527,30 @@
               "fase_afectada": "Fase 3-4. Calidad y transformación"
             },
             {
+              "escenario": "Recencia con la fecha del sistema",
+              "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+              "semilla": 42,
+              "ari": 1.0,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
+              "escenario": "Recencia con la fecha del sistema",
+              "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+              "semilla": 7,
+              "ari": 0.9932,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
+              "escenario": "Recencia con la fecha del sistema",
+              "descripcion": "Se calcula la recencia contra la fecha del sistema (2026-10-25) en lugar del máximo del dataset.",
+              "semilla": 2024,
+              "ari": 0.9904,
+              "clientes_evaluados": 28971,
+              "fase_afectada": "Fase 4. Transformación"
+            },
+            {
               "escenario": "Sin estandarización",
               "descripcion": "K-Means sobre variables en su escala original; el ingreso domina la distancia.",
               "semilla": 42,
@@ -579,7 +612,7 @@
       "phase": 7,
       "title": "Presentación y uso del conocimiento",
       "status": "ok",
-      "duration_s": 0.005,
+      "duration_s": 0.004,
       "metrics": {
         "ingreso_en_riesgo_usd": 10567705.4,
         "potencial_crecimiento_usd": 16953138.7,

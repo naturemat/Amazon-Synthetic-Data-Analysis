@@ -21,7 +21,7 @@ SEGMENT_PLAYBOOK: Dict[str, Dict[str, Any]] = {
         ],
         "kpi": "Retención, frecuencia, ticket y participación en el ingreso.",
         "riesgo": "Concentración extrema: pocos clientes explican una parte crítica del ingreso.",
-        "supuesto_impacto": "Retención adicional del 3 % anual del ingreso del segmento.",
+        "supuesto_impacto": "Retención adicional del 3 % del ingreso histórico del segmento.",
         "tasa_impacto": 0.03,
     },
     "VIP Leales": {
@@ -34,7 +34,7 @@ SEGMENT_PLAYBOOK: Dict[str, Dict[str, Any]] = {
         ],
         "kpi": "Retención, ingreso por cliente y días entre compras.",
         "riesgo": "La pérdida de pocos clientes afecta una porción grande del ingreso.",
-        "supuesto_impacto": "Retención adicional del 3 % anual del ingreso del segmento.",
+        "supuesto_impacto": "Retención adicional del 3 % del ingreso histórico del segmento.",
         "tasa_impacto": 0.03,
     },
     "VIP en Riesgo": {

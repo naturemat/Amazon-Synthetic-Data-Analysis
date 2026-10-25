@@ -40,6 +40,7 @@ from src.config.settings import (
     KDD_OUTPUT_DIR,
     N_BOOTSTRAP_STABILITY,
     RESULTS_DIR,
+    STABILITY_ARI_THRESHOLD,
     SUCCESS_CRITERIA,
 )
 from src.core.formatters import configure_matplotlib_style, configure_pandas_display
@@ -319,19 +320,25 @@ def run_pipeline(k: int | None = None, run_experiment: bool = True,
             "max_items_por_pedido": association.diagnostic.get("items_por_pedido_max"),
             "reglas_co_compra_encontradas": int(len(rules)),
         })
+        silhouette_txt = (
+            f"{segmenter.selection['silhouette']:.3f}"
+            if segmenter.selection.get("silhouette") is not None else "n/d"
+        )
         phase.decision(
             f"k = {selected_k} se elige con evidencia: mayor silhouette entre k=3..6 "
-            f"({segmenter.selection.get('silhouette'):.3f}), desempate por "
+            f"({silhouette_txt}), desempate por "
             "Davies-Bouldin y umbral mínimo de tamaño documentado. El codo se "
             "reporta como diagnóstico complementario."
         )
         if segmenter.selection.get("restriccion_relajada"):
+            min_pct = segmenter.selection.get("cluster_min_pct")
+            min_txt = f"{min_pct:.2f} %" if min_pct is not None else "n/d"
             phase.warn(
-                "Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster: la estructura "
-                "natural contiene un segmento élite de 1,29 % (375 clientes) que "
-                "concentra 34,78 % del ingreso. Se relajó el umbral al 1 % técnico "
-                "en lugar de fusionarlo o descartarlo, y la relajación queda "
-                "registrada en la evaluación."
+                "Ningún k de 3 a 6 alcanzó el 5 % mínimo por cluster "
+                f"(el menor: {min_txt}). La estructura natural contiene un segmento "
+                "élite pequeño que concentra una parte crítica del ingreso. Se relajó "
+                "el umbral al 1 % técnico en lugar de fusionarlo o descartarlo, y la "
+                "relajación queda registrada en la evaluación."
             )
         phase.decision(
             "No se usa Apriori clásico: no hay canastas multi-producto. Se calculan "
@@ -387,6 +394,9 @@ def run_pipeline(k: int | None = None, run_experiment: bool = True,
             degradation_payload = {
                 "resumen": experiment.summary.to_dict(orient="records"),
                 "detalle": experiment.rows,
+                "fecha_corte": experiment.cutoff.date().isoformat(),
+                "fecha_sistema_usada": experiment.system_cutoff.date().isoformat(),
+                "umbral_estabilidad": STABILITY_ARI_THRESHOLD,
             }
             print(experiment.summary.to_string(index=False))
 

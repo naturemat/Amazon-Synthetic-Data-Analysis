@@ -162,13 +162,33 @@ class KDDReport:
                       "| Escenario | Fase afectada | ARI medio | Desv. | Interpretación |",
                       "|---|---|---:|---:|---|"]
             for row in self.degradation.get("resumen", []):
-                interp = "Estable" if row["ari_media"] >= 0.70 else (
-                    "Degradación moderada" if row["ari_media"] >= 0.50 else "Degradación severa"
-                )
+                if row["ari_media"] >= 0.90:
+                    interp = "Partición casi idéntica"
+                elif row["ari_media"] >= 0.70:
+                    interp = "Degradación moderada"
+                elif row["ari_media"] >= 0.50:
+                    interp = "Degradación alta"
+                else:
+                    interp = "Degradación severa"
                 lines.append(
                     f"| {row['escenario']} | {row['fase_afectada']} | "
                     f"{row['ari_media']:.4f} | {row['ari_desv']:.4f} | {interp} |"
                 )
+            lines += [
+                "",
+                "> Un ARI alto indica que la partición se reproduce, no que los "
+                "totales sean correctos: duplicados o ruido pueden preservar los "
+                "segmentos y, a la vez, inflar pedidos e ingreso. El ARI debe "
+                "acompañarse de auditoría de ingresos y conteos.",
+            ]
+            system_date = self.degradation.get("fecha_sistema_usada")
+            if system_date:
+                lines += [
+                    "",
+                    f"> La fecha del sistema se fijó en {system_date} para que el "
+                    "escenario sea reproducible; en producción sería la fecha real "
+                    "de consulta.",
+                ]
 
         if self.knowledge:
             lines += ["", "## 8. Uso del conocimiento (fase 7)", "",

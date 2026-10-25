@@ -177,6 +177,10 @@ DEGRADATION_SEEDS = [42, 7, 2024]
 DEGRADATION_DUPLICATE_RATE = 0.05
 DEGRADATION_NULL_RATE = 0.10
 DEGRADATION_NOISE_RATE = 0.20
+# Fecha del sistema usada en el escenario que imita calcular la recencia con
+# "hoy". Se fija para que el experimento sea reproducible; representa la fecha
+# de ejecución del ensayo.
+DEGRADATION_SYSTEM_DATE = "2026-10-25"
 
 # ---------------------------------------------------------------------------
 # Rutas de salida

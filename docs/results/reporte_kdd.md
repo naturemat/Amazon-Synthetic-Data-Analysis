@@ -2,7 +2,7 @@
 
 **Proyecto:** Segmentación de clientes de una tienda en línea (Amazon Sales).  
 **Método:** Knowledge Discovery in Databases (Fayyad et al., 1996).  
-**Generado:** 2026-10-25T08:45:20
+**Generado:** 2026-10-25T09:08:08
 
 Este documento es evidencia automática del pipeline. El ensayo académico que interpreta los resultados está en `propuesta_PDF.md`.
 
@@ -95,12 +95,15 @@ ARI frente a la solución de referencia (1.0 = idénticos):
 
 | Escenario | Fase afectada | ARI medio | Desv. | Interpretación |
 |---|---|---:|---:|---|
-| Ruido ±20% en precio (20% filas) | Fase 3-4. Calidad y transformación | 0.9817 | 0.0023 | Estable |
-| Duplicados 5% (limpieza omitida) | Fase 3. Preprocesamiento | 0.9666 | 0.0017 | Estable |
-| Sin filtrar estados no realizados | Fase 3. Preprocesamiento | 0.8615 | 0.0016 | Estable |
-| Nulos 10% imputados con 0 | Fase 3. Preprocesamiento | 0.7683 | 0.0017 | Estable |
+| Recencia con la fecha del sistema | Fase 4. Transformación | 0.9945 | 0.0049 | Partición casi idéntica |
+| Ruido ±20% en precio (20% filas) | Fase 3-4. Calidad y transformación | 0.9817 | 0.0023 | Partición casi idéntica |
+| Duplicados 5% (limpieza omitida) | Fase 3. Preprocesamiento | 0.9666 | 0.0017 | Partición casi idéntica |
+| Sin filtrar estados no realizados | Fase 3. Preprocesamiento | 0.8615 | 0.0016 | Degradación moderada |
+| Nulos 10% imputados con 0 | Fase 3. Preprocesamiento | 0.7683 | 0.0017 | Degradación moderada |
 | Sin estandarización | Fase 4. Transformación | 0.1597 | 0.0001 | Degradación severa |
 | k=2 fijado sin evaluación | Fase 5. Minería | 0.0198 | 0.0000 | Degradación severa |
+
+> Un ARI alto indica que la partición se reproduce, no que los totales sean correctos: duplicados o ruido pueden preservar los segmentos y, a la vez, inflar pedidos e ingreso. El ARI debe acompañarse de auditoría de ingresos y conteos.
 
 ## 8. Uso del conocimiento (fase 7)
 
@@ -116,12 +119,12 @@ ARI frente a la solución de referencia (1.0 = idénticos):
 | Fase | Nombre | Estado | Duración (s) | Alertas |
 |---|---|---|---:|---:|
 | 1 | Comprensión del dominio y definición del objetivo | ok | 0.00 | 0 |
-| 2 | Selección de datos | ok | 4.00 | 1 |
-| 3 | Preprocesamiento y limpieza | ok | 1.87 | 1 |
-| 4 | Transformación y reducción | ok | 9.02 | 1 |
-| 5 | Minería de datos | ok | 123.14 | 1 |
-| 6 | Interpretación y evaluación | ok | 116.42 | 0 |
-| 7 | Presentación y uso del conocimiento | ok | 0.01 | 0 |
+| 2 | Selección de datos | ok | 2.62 | 1 |
+| 3 | Preprocesamiento y limpieza | ok | 0.89 | 1 |
+| 4 | Transformación y reducción | ok | 5.20 | 1 |
+| 5 | Minería de datos | ok | 74.01 | 1 |
+| 6 | Interpretación y evaluación | ok | 90.32 | 0 |
+| 7 | Presentación y uso del conocimiento | ok | 0.00 | 0 |
 
 ## 10. Limitaciones declaradas
 

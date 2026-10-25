@@ -121,6 +121,7 @@ def select_k(table: pd.DataFrame,
 
     relaxed = False
     applied_share = min_share
+    fallback_all = False
     if eligible.empty:
         eligible = in_range[
             (in_range["cluster_min_pct"] >= min_share_hard * 100)
@@ -133,6 +134,7 @@ def select_k(table: pd.DataFrame,
         eligible = table[table["silhouette"] > 0].copy()
         relaxed = True
         applied_share = 0.0
+        fallback_all = True
 
     if eligible.empty:
         raise ValueError("No hay valores de k con silhouette positivo para seleccionar.")
@@ -143,7 +145,13 @@ def select_k(table: pd.DataFrame,
     best = eligible.iloc[0]
     runner_up = eligible.iloc[1] if len(eligible) > 1 else None
 
-    if relaxed:
+    if fallback_all:
+        criterio = (
+            "Mayor silhouette entre todos los k evaluados: no hubo ninguna "
+            f"solución en el rango {k_min}..{k_max}. Desempate por menor "
+            "Davies-Bouldin."
+        )
+    elif relaxed:
         criterio = (
             f"Mayor silhouette entre k={k_min}..{k_max}. Ningún k alcanzó el "
             f"{min_share:.0%} mínimo por cluster; la restricción se relajó al "
